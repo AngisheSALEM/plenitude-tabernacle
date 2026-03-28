@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
+import Link from "next/link"
 import { Play, Clock, User, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -58,13 +59,15 @@ export function VideosSection() {
               Dernières Prédications Vidéo
             </h2>
           </div>
-          <Button 
-            variant="outline" 
-            className="self-start md:self-auto border-primary/30 text-primary hover:bg-primary/10 rounded-full group"
-          >
-            Voir toutes les vidéos
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <Link href="/videos">
+            <Button 
+              variant="outline" 
+              className="self-start md:self-auto border-primary/30 text-primary hover:bg-primary/10 rounded-full group"
+            >
+              Voir toutes les videos
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
         </motion.div>
 
         {/* Videos Grid */}
