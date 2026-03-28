@@ -91,13 +91,15 @@ export function Navbar() {
                 </Button>
               </Link>
               <ThemeToggle />
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
-              >
-                <LogIn className="mr-2 h-4 w-4" />
-                Connexion
-              </Button>
+              <Link href="/connexion">
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Connexion
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -162,10 +164,12 @@ export function Navbar() {
                 transition={{ delay: 0.4 }}
                 className="space-y-3"
               >
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
-                  <LogIn className="mr-2 h-5 w-5" />
-                  Se Connecter
-                </Button>
+                <Link href="/connexion" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
+                    <LogIn className="mr-2 h-5 w-5" />
+                    Se Connecter
+                  </Button>
+                </Link>
               </motion.div>
             </motion.nav>
           </motion.div>
