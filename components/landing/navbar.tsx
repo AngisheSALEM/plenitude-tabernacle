@@ -6,13 +6,14 @@ import { Menu, X, Play, Headphones, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navLinks = [
-  { href: "#accueil", label: "Accueil" },
-  { href: "#a-propos", label: "À Propos" },
-  { href: "#videos", label: "Vidéos" },
-  { href: "#audio", label: "Audio" },
-  { href: "#localisation", label: "Localisation" },
+  { href: "/", label: "Accueil" },
+  { href: "/#a-propos", label: "A Propos" },
+  { href: "/videos", label: "Videos" },
+  { href: "/audio", label: "Audio" },
+  { href: "/#localisation", label: "Localisation" },
 ]
 
 export function Navbar() {
@@ -69,22 +70,27 @@ export function Navbar() {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Headphones className="mr-2 h-4 w-4" />
-                Audio
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Vidéos
-              </Button>
+              <Link href="/audio">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Headphones className="mr-2 h-4 w-4" />
+                  Audio
+                </Button>
+              </Link>
+              <Link href="/videos">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Videos
+                </Button>
+              </Link>
+              <ThemeToggle />
               <Button
                 size="sm"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"

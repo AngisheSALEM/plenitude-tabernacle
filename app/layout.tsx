@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -14,10 +15,10 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Plénitude Tabernacle | Église de Kinshasa',
-  description: 'Bienvenue à Plénitude Tabernacle - Une église vivante au cœur de Kinshasa. Découvrez nos enseignements, prédications et rejoignez notre communauté spirituelle.',
+  title: 'Plenitude Tabernacle | Eglise de Kinshasa',
+  description: 'Bienvenue a Plenitude Tabernacle - Une eglise vivante au coeur de Kinshasa. Decouvrez nos enseignements, predications et rejoignez notre communaute spirituelle.',
   generator: 'v0.app',
-  keywords: ['église', 'Kinshasa', 'Plénitude Tabernacle', 'Joel Mugisho', 'prédications', 'streaming'],
+  keywords: ['eglise', 'Kinshasa', 'Plenitude Tabernacle', 'Joel Mugisho', 'predications', 'streaming'],
   icons: {
     icon: [
       {
@@ -49,9 +50,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

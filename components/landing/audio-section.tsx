@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState } from "react"
+import Link from "next/link"
 import { Play, Pause, Headphones, Clock, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
 
 const audioTracks = [
   {
@@ -90,13 +90,15 @@ export function AudioSection() {
               </div>
             </div>
 
-            <Button 
-              variant="outline" 
-              className="border-primary/30 text-primary hover:bg-primary/10 rounded-full group"
-            >
-              Explorer la médiathèque audio
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <Link href="/audio">
+              <Button 
+                variant="outline" 
+                className="border-primary/30 text-primary hover:bg-primary/10 rounded-full group"
+              >
+                Explorer la mediatheque audio
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Right: Audio Player UI */}
