@@ -582,28 +582,155 @@ export const cantiques: Cantique[] = [
     chorus: [
       "Dans cette cite ou l'Agneau est la Lumiere,\nCette cite ou il n'y a point de nuit;\nJ'ai un beau palais la-haut, et libere des soucis,\nJe m'en irai ou l'Agneau est la Lumiere."
     ]
+  },
+  {
+    id: 32,
+    title: "AU NOM DE JESUS",
+    reference: "Crois seulement 65",
+    category: "Jesus",
+    lyrics: [
+      "Au nom de Jesus, tout genou flechira,\nAu Ciel, sur terre, aux enfers;\nToute langue confessera Jesus-Christ,\nEst le Seigneur de tout.",
+      "Au nom de Jesus, les demons s'enfuiront,\nLes malades seront gueris;\nLa puissance du sang de Jesus-Christ,\nNous donne la victoire.",
+      "Au nom de Jesus, nous sommes plus que vainqueurs,\nPar Celui qui nous a aimes;\nRien ne pourra nous separer de Christ,\nNi la mort, ni la vie."
+    ],
+    chorus: [
+      "Jesus! Jesus! Nom glorieux!\nJesus! Jesus! Nom precieux!\nQuel beau nom que le nom de Jesus!"
+    ]
+  },
+  {
+    id: 33,
+    title: "ESPRIT DE DIEU, DESCENDS",
+    reference: "Crois seulement 70",
+    category: "Saint-Esprit",
+    lyrics: [
+      "Esprit de Dieu, descends sur moi,\nViens me remplir de Toi;\nQue ma vie soit un sacrifice,\nAgreable a mon Roi.",
+      "Esprit de verite, eclaire-moi,\nGuide mes pas chaque jour;\nQue je marche dans Tes voies,\nDans la lumiere de l'amour.",
+      "Esprit de puissance, fortifie-moi,\nDans les temps difficiles;\nQue je sois un temoin fidele,\nDe Ta grace infinie."
+    ],
+    chorus: [
+      "Viens, Saint-Esprit, viens!\nRemplis-moi maintenant;\nQue Ta presence divine,\nM'envahisse pleinement."
+    ]
+  },
+  {
+    id: 34,
+    title: "QUEL AMI FIDELE ET TENDRE",
+    reference: "Crois seulement 75",
+    category: "Amour",
+    lyrics: [
+      "Quel ami fidele et tendre,\nNous avons en Jesus-Christ!\nToujours pret a nous entendre,\nA repondre a notre cri.",
+      "Il connait nos defaillances,\nNos chutes de chaque jour;\nSevere en Ses exigences,\nIl est riche en Son amour.",
+      "Disons-Lui toutes nos craintes,\nOuvrons-Lui tout notre coeur;\nBientot Ses divines etreintes,\nNous rendront plus que vainqueurs."
+    ],
+    chorus: [
+      "Quel ami fidele et tendre,\nNous avons en Jesus-Christ!\nToujours pret a nous defendre,\nQuand l'ennemi nous poursuit."
+    ]
+  },
+  {
+    id: 35,
+    title: "J'IRAI OU TU VOUDRAS",
+    reference: "Crois seulement 80",
+    category: "Mission",
+    lyrics: [
+      "J'irai ou Tu voudras que j'aille,\nCher Maitre, je suivrai Tes pas;\nSur les monts ou dans les vallees,\nPartout Tu me guideras.",
+      "Je dirai ce que Tu voudras,\nTa Parole sera ma vie;\nJe parlerai de Ton amour,\nDans les tenebres ou la lumiere luit.",
+      "Je serai ce que Tu voudras,\nFaconne-moi a Ton image;\nQue ma vie soit un temoignage,\nDe Ta gloire ici-bas."
+    ],
+    chorus: [
+      "Me voici, Seigneur, envoie-moi!\nJe suis pret a obeir;\nLa ou Tu m'enverras j'irai,\nPour Ton nom glorifier."
+    ]
+  },
+  {
+    id: 36,
+    title: "MA FOI REGARDE A TOI",
+    reference: "Crois seulement 85",
+    category: "Confiance",
+    lyrics: [
+      "Ma foi regarde a Toi,\nAgneau de Dieu, Sauveur;\nExauce-moi, je viens a Toi,\nOte mon peche, Seigneur.",
+      "Que Ton amour vainqueur,\nRemplisse tout mon coeur;\nQue pour Toi seul, mon Redempteur,\nJe vive a chaque heure.",
+      "Quand viendra le moment,\nDu dernier grand combat;\nSois mon Rocher, Dieu tout-puissant,\nGuide mes pas la-bas."
+    ],
+    chorus: [
+      "Ma foi regarde a Toi,\nJesus, divin Sauveur;\nJe mets ma confiance en Toi,\nTu es mon Redempteur."
+    ]
+  },
+  {
+    id: 37,
+    title: "DEVANT LE TRONE CELESTE",
+    reference: "Crois seulement 90",
+    category: "Adoration",
+    lyrics: [
+      "Devant le trone celeste,\nJe m'incline avec respect;\nDevant la majeste divine,\nJe chante: Saint, Saint, Saint!",
+      "Les anges voilent leur face,\nDevant l'eclat de Ta gloire;\nEt moi, pecheur par Ta grace,\nJ'ose entrer dans Ton histoire.",
+      "Digne es-Tu, Seigneur,\nDe recevoir tout honneur;\nLa puissance et la richesse,\nAppartiennent au Createur."
+    ],
+    chorus: [
+      "Saint, Saint, Saint est le Seigneur!\nLe Ciel et la terre sont remplis,\nDe Sa gloire et de Sa splendeur;\nGloire a Dieu aux lieux tres hauts!"
+    ]
+  },
+  {
+    id: 38,
+    title: "IL ME DELIVRE",
+    reference: "Crois seulement 95",
+    category: "Delivrance",
+    lyrics: [
+      "Il me delivre, Il me delivre,\nMon Sauveur me delivre;\nDe tout peche, de toute crainte,\nMon Sauveur me delivre.",
+      "Des chaines du peche qui m'enchainait,\nJesus m'a delivre;\nDu pouvoir de Satan, mon ennemi,\nJesus m'a libere.",
+      "Je suis libre maintenant,\nLibre par le sang de Christ;\nPlus de condamnation,\nJesus m'a affranchi."
+    ],
+    chorus: [
+      "Delivre, delivre,\nJesus m'a delivre!\nMon ame chante alleluia,\nJesus m'a delivre!"
+    ]
+  },
+  {
+    id: 39,
+    title: "QUAND JE CONTEMPLE LA CROIX",
+    reference: "Crois seulement 100",
+    category: "Redemption",
+    lyrics: [
+      "Quand je contemple la croix,\nOu le Prince de gloire est mort,\nJe considere comme une perte,\nTout ce qui me semblait un tresor.",
+      "Interdit-moi, Seigneur, de me vanter,\nSi ce n'est dans la mort de Christ;\nTout charme et tout attrait du monde,\nJe les sacrifie a Son nom.",
+      "Voyez sur Sa tete, Ses mains et pieds,\nLa douleur et l'amour s'entremelent;\nJamais l'amour et la douleur,\nN'ont forme couronne si belle."
+    ]
+  },
+  {
+    id: 40,
+    title: "MARCHONS ENSEMBLE",
+    reference: "Crois seulement 105",
+    category: "Communion",
+    lyrics: [
+      "Marchons ensemble dans l'unite,\nDans l'amour et la verite;\nFreres et soeurs en Jesus-Christ,\nUnis par Son Saint-Esprit.",
+      "Portons les fardeaux les uns des autres,\nComme Christ nous l'a commande;\nDans la joie comme dans la peine,\nRestons toujours lies.",
+      "Le monde saura que nous sommes Ses disciples,\nPar l'amour que nous aurons;\nEnsemble nous vaincrons,\nCar Dieu est avec nous."
+    ],
+    chorus: [
+      "Unis, unis dans l'amour,\nUnis dans la foi;\nMarchons ensemble chaque jour,\nSur les traces de notre Roi."
+    ]
   }
 ]
 
 export const categories = [
   "Tous",
+  "Adoration",
+  "Amour",
+  "Aspiration",
+  "Benediction",
+  "Ciel",
+  "Combat spirituel",
+  "Communion",
+  "Confiance",
+  "Consecration",
+  "Delivrance",
+  "Esperance",
   "Foi",
   "Grace",
-  "Priere",
-  "Adoration",
-  "Louange",
-  "Combat spirituel",
-  "Consecration",
-  "Esperance",
-  "Redemption",
-  "Benediction",
-  "Saint-Esprit",
-  "Ciel",
-  "Communion",
-  "Delivrance",
-  "Amour",
   "Jesus",
+  "Louange",
+  "Marche",
   "Mission",
-  "Confiance",
+  "Priere",
+  "Redemption",
+  "Refuge",
+  "Saint-Esprit",
+  "Soumission",
   "Temoignage"
 ]

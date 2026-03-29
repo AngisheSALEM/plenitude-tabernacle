@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, Play, Headphones, LogIn } from "lucide-react"
+import { Menu, X, Play, Headphones, LogIn, Book } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/#a-propos", label: "A Propos" },
   { href: "/videos", label: "Videos" },
   { href: "/audio", label: "Audio" },
+  { href: "/cantiques", label: "Cantiques" },
   { href: "/#localisation", label: "Localisation" },
 ]
 
@@ -88,6 +89,16 @@ export function Navbar() {
                 >
                   <Play className="mr-2 h-4 w-4" />
                   Videos
+                </Button>
+              </Link>
+              <Link href="/cantiques">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Book className="mr-2 h-4 w-4" />
+                  Cantiques
                 </Button>
               </Link>
               <ThemeToggle />

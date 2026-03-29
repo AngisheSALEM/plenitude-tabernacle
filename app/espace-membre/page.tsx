@@ -7,7 +7,7 @@ import {
   Play, Pause, Download, Headphones, Video, MapPin, 
   Calendar, Clock, Search, Filter, Grid, List,
   Heart, Share2, CheckCircle, ArrowRight, User,
-  ChevronDown, X, LogOut, Settings, Bell
+  ChevronDown, X, LogOut, Settings, Bell, Book, Music
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { HymnBook } from "@/components/cantiques/hymn-book"
 
 // Mock data for videos
 const allVideos = [
@@ -133,13 +134,17 @@ export default function EspaceMembrePage() {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profil
+                  <DropdownMenuItem asChild>
+                    <Link href="/profil">
+                      <User className="mr-2 h-4 w-4" />
+                      Profil
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Parametres
+                  <DropdownMenuItem asChild>
+                    <Link href="/parametres">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Parametres
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -181,6 +186,10 @@ export default function EspaceMembrePage() {
               <TabsTrigger value="audio" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Headphones className="mr-2 h-4 w-4" />
                 Audio
+              </TabsTrigger>
+              <TabsTrigger value="cantiques" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Book className="mr-2 h-4 w-4" />
+                Cantiques
               </TabsTrigger>
               <TabsTrigger value="downloads" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Download className="mr-2 h-4 w-4" />
@@ -465,6 +474,11 @@ export default function EspaceMembrePage() {
                 </motion.div>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Cantiques Tab */}
+          <TabsContent value="cantiques" className="space-y-6">
+            <HymnBook />
           </TabsContent>
 
           {/* Downloads Tab */}

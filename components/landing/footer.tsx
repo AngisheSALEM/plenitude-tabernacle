@@ -7,9 +7,10 @@ const footerLinks = {
   navigation: [
     { label: "Accueil", href: "/" },
     { label: "À Propos", href: "#a-propos" },
-    { label: "Vidéos", href: "#videos" },
-    { label: "Audio", href: "#audio" },
-    { label: "Localisation", href: "#localisation" },
+    { label: "Vidéos", href: "/videos" },
+    { label: "Audio", href: "/audio" },
+    { label: "Cantiques", href: "/cantiques" },
+    { label: "Espace Membre", href: "/espace-membre" },
   ],
   legal: [
     { label: "Mentions Légales", href: "#" },
