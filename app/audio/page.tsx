@@ -11,10 +11,8 @@ import {
   VolumeX,
   Search, 
   Headphones, 
-  Clock, 
   User, 
   Calendar,
-  Heart,
   Share2,
   Repeat,
   Shuffle,
@@ -150,7 +148,7 @@ export default function AudioPage() {
   const [isShuffled, setIsShuffled] = useState(false)
   const [isRepeating, setIsRepeating] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
-  const [likedTracks, setLikedTracks] = useState<number[]>([])
+  
 
   const progressInterval = useRef<NodeJS.Timeout | null>(null)
 
@@ -177,13 +175,7 @@ export default function AudioPage() {
     setIsPlaying(!isPlaying)
   }
 
-  const toggleLike = (trackId: number) => {
-    setLikedTracks(prev => 
-      prev.includes(trackId) 
-        ? prev.filter(id => id !== trackId)
-        : [...prev, trackId]
-    )
-  }
+  
 
   const playNext = () => {
     if (!currentTrack) return
@@ -392,17 +384,6 @@ export default function AudioPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      toggleLike(track.id)
-                    }}
-                  >
-                    <Heart className={`h-4 w-4 ${likedTracks.includes(track.id) ? "fill-primary text-primary" : ""}`} />
-                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

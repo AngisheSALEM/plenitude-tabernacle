@@ -584,7 +584,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 32,
+    id: 43,
     title: "AU NOM DE JESUS",
     reference: "Crois seulement 65",
     category: "Jesus",
@@ -598,7 +598,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 33,
+    id: 44,
     title: "ESPRIT DE DIEU, DESCENDS",
     reference: "Crois seulement 70",
     category: "Saint-Esprit",
@@ -612,7 +612,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 34,
+    id: 45,
     title: "QUEL AMI FIDELE ET TENDRE",
     reference: "Crois seulement 75",
     category: "Amour",
@@ -626,7 +626,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 35,
+    id: 46,
     title: "J'IRAI OU TU VOUDRAS",
     reference: "Crois seulement 80",
     category: "Mission",
@@ -640,7 +640,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 36,
+    id: 47,
     title: "MA FOI REGARDE A TOI",
     reference: "Crois seulement 85",
     category: "Confiance",
@@ -654,7 +654,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 37,
+    id: 48,
     title: "DEVANT LE TRONE CELESTE",
     reference: "Crois seulement 90",
     category: "Adoration",
@@ -668,7 +668,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 38,
+    id: 49,
     title: "IL ME DELIVRE",
     reference: "Crois seulement 95",
     category: "Delivrance",
@@ -682,7 +682,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 39,
+    id: 50,
     title: "QUAND JE CONTEMPLE LA CROIX",
     reference: "Crois seulement 100",
     category: "Redemption",
@@ -693,7 +693,7 @@ export const cantiques: Cantique[] = [
     ]
   },
   {
-    id: 40,
+    id: 51,
     title: "MARCHONS ENSEMBLE",
     reference: "Crois seulement 105",
     category: "Communion",

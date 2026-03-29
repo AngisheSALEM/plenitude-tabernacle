@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { Play, Clock, User, Search, Filter, Grid, List, Calendar, Eye, Heart, Share2, X } from "lucide-react"
+import { Play, Clock, User, Search, Grid, List, Calendar, Eye, Share2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/landing/navbar"
@@ -387,14 +387,9 @@ export default function VideosPage() {
                     {selectedVideo.title}
                   </h2>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-full">
+                <Button variant="outline" size="icon" className="rounded-full">
                     <Share2 className="h-4 w-4" />
                   </Button>
-                </div>
               </div>
               <p className="text-muted-foreground mb-4">{selectedVideo.description}</p>
               <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">

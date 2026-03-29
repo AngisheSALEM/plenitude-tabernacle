@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Home
+  Home,
+  Book
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -23,6 +24,7 @@ const sidebarLinks = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/audio", label: "Audio", icon: Headphones },
+  { href: "/admin/cantiques", label: "Cantiques", icon: Book },
   { href: "/admin/annonces", label: "Annonces", icon: Megaphone },
   { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
   { href: "/admin/parametres", label: "Parametres", icon: Settings },

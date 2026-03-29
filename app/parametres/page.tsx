@@ -4,8 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { 
-  ArrowLeft, Bell, Globe, Lock, Moon, Palette, Shield, 
-  Smartphone, Volume2, Eye, EyeOff, Save, User, Mail,
+  ArrowLeft, Bell, Lock, Palette, 
+  Smartphone, Eye, EyeOff, Save, User, Mail,
   Download, Trash2, HelpCircle, MessageSquare, FileText,
   ChevronRight, Check
 } from "lucide-react"
@@ -15,13 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 import {
   Dialog,
   DialogContent,
@@ -47,19 +41,6 @@ export default function ParametresPage() {
     newAudioNotif: true,
     eventNotif: true,
     newsletterNotif: false,
-    
-    // Preferences
-    language: "fr",
-    autoPlay: true,
-    downloadQuality: "high",
-    streamingQuality: "auto",
-    
-    // Privacy
-    showProfile: true,
-    showActivity: false,
-    
-    // Security
-    twoFactorAuth: false,
   })
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -265,35 +246,13 @@ export default function ParametresPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                {/* Language & Display */}
+                {/* Theme */}
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-primary" />
-                    Langue et affichage
+                    <Palette className="h-5 w-5 text-primary" />
+                    Affichage
                   </h2>
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Langue</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Choisir la langue de l&apos;interface
-                        </p>
-                      </div>
-                      <Select
-                        value={settings.language}
-                        onValueChange={(value) => updateSetting("language", value)}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fr">Francais</SelectItem>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="sw">Swahili</SelectItem>
-                          <SelectItem value="ln">Lingala</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label className="text-base">Theme</Label>
@@ -302,105 +261,6 @@ export default function ParametresPage() {
                         </p>
                       </div>
                       <ThemeToggle />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Media Settings */}
-                <div className="bg-card border border-border rounded-2xl p-6">
-                  <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <Volume2 className="h-5 w-5 text-primary" />
-                    Parametres media
-                  </h2>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Lecture automatique</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Lire automatiquement le contenu suivant
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.autoPlay}
-                        onCheckedChange={(checked) => updateSetting("autoPlay", checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Qualite de telechargement</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Qualite des fichiers telecharges
-                        </p>
-                      </div>
-                      <Select
-                        value={settings.downloadQuality}
-                        onValueChange={(value) => updateSetting("downloadQuality", value)}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Basse (economie de donnees)</SelectItem>
-                          <SelectItem value="medium">Moyenne</SelectItem>
-                          <SelectItem value="high">Haute</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Qualite de streaming</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Qualite de lecture en ligne
-                        </p>
-                      </div>
-                      <Select
-                        value={settings.streamingQuality}
-                        onValueChange={(value) => updateSetting("streamingQuality", value)}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="auto">Automatique</SelectItem>
-                          <SelectItem value="low">Basse</SelectItem>
-                          <SelectItem value="medium">Moyenne</SelectItem>
-                          <SelectItem value="high">Haute</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Privacy */}
-                <div className="bg-card border border-border rounded-2xl p-6">
-                  <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <Eye className="h-5 w-5 text-primary" />
-                    Confidentialite
-                  </h2>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Profil visible</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Permettre aux autres membres de voir mon profil
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.showProfile}
-                        onCheckedChange={(checked) => updateSetting("showProfile", checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Afficher mon activite</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Montrer mes videos vues et favoris
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.showActivity}
-                        onCheckedChange={(checked) => updateSetting("showActivity", checked)}
-                      />
                     </div>
                   </div>
                 </div>
@@ -485,28 +345,6 @@ export default function ParametresPage() {
                     <Button className="mt-2">
                       Mettre a jour le mot de passe
                     </Button>
-                  </div>
-                </div>
-
-                {/* Two-Factor Auth */}
-                <div className="bg-card border border-border rounded-2xl p-6">
-                  <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Securite avancee
-                  </h2>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Authentification a deux facteurs</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Ajouter une couche de securite supplementaire
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.twoFactorAuth}
-                        onCheckedChange={(checked) => updateSetting("twoFactorAuth", checked)}
-                      />
-                    </div>
                   </div>
                 </div>
 
