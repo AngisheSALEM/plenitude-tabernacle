@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { Play, Clock, User, Search, Grid, List, Calendar, Eye, Share2, X } from "lucide-react"
+import { Play, Clock, User, Search, Grid, List, Calendar, Share2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/landing/navbar"
@@ -24,7 +24,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "24 Mars 2026",
     duration: "1h 15min",
-    views: "2.4K",
     category: "Predications",
     description: "Decouvrez la puissance transformatrice de la resurrection de Jesus-Christ et son impact dans notre vie quotidienne.",
   },
@@ -34,7 +33,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "17 Mars 2026",
     duration: "58min",
-    views: "1.8K",
     category: "Enseignements",
     description: "Comment developper une foi inebranlable face aux defis de la vie.",
   },
@@ -44,7 +42,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "10 Mars 2026",
     duration: "1h 05min",
-    views: "3.1K",
     category: "Predications",
     description: "Les promesses divines sont un ancrage pour notre ame dans les temps difficiles.",
   },
@@ -54,7 +51,6 @@ const videos = [
     speaker: "Chorale Plenitude",
     date: "3 Mars 2026",
     duration: "45min",
-    views: "5.2K",
     category: "Louange",
     description: "Un moment de louange et d'adoration intense avec la chorale de Plenitude Tabernacle.",
   },
@@ -64,7 +60,6 @@ const videos = [
     speaker: "Frere Emmanuel",
     date: "25 Fevrier 2026",
     duration: "32min",
-    views: "4.7K",
     category: "Temoignages",
     description: "Un temoignage puissant de guerison miraculeuse apres 10 ans de maladie.",
   },
@@ -74,7 +69,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "18 Fevrier 2026",
     duration: "2h 30min",
-    views: "2.9K",
     category: "Conferences",
     description: "Comment batir une famille solide sur les fondements bibliques.",
   },
@@ -84,7 +78,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "11 Fevrier 2026",
     duration: "1h 02min",
-    views: "1.5K",
     category: "Predications",
     description: "Comprendre la grace de Dieu qui nous suffit dans toutes les circonstances.",
   },
@@ -94,7 +87,6 @@ const videos = [
     speaker: "Chorale Plenitude",
     date: "4 Fevrier 2026",
     duration: "55min",
-    views: "3.8K",
     category: "Louange",
     description: "Compilation des meilleurs moments de louange du mois de fevrier.",
   },
@@ -104,7 +96,6 @@ const videos = [
     speaker: "Pasteur Joel Mugisho",
     date: "28 Janvier 2026",
     duration: "1h 20min",
-    views: "2.1K",
     category: "Enseignements",
     description: "Les armes spirituelles pour remporter la victoire dans nos combats.",
   },
@@ -271,10 +262,6 @@ export default function VideosPage() {
                         <Calendar className="h-4 w-4" />
                         {video.date}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {video.views} vues
-                      </span>
                     </div>
                   </div>
                 </motion.article>
@@ -325,10 +312,6 @@ export default function VideosPage() {
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         {video.date}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {video.views} vues
                       </span>
                     </div>
                   </div>
@@ -404,10 +387,6 @@ export default function VideosPage() {
                 <span className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {selectedVideo.duration}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  {selectedVideo.views} vues
                 </span>
               </div>
             </div>

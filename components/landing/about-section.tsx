@@ -7,24 +7,24 @@ import { Church, Heart, Users, BookOpen } from "lucide-react"
 
 const values = [
   {
-    icon: Heart,
-    title: "Amour",
-    description: "Un cœur ouvert pour accueillir chaque âme",
+    icon: BookOpen,
+    title: "La Parole Restauree",
+    description: "Ramener le coeur des enfants a la foi des peres apostoliques",
   },
   {
-    icon: BookOpen,
-    title: "Enseignement",
-    description: "La Parole de Dieu comme fondement",
+    icon: Heart,
+    title: "L'Unicite de Dieu",
+    description: "Jesus-Christ, le Dieu unique manifeste dans la chair",
   },
   {
     icon: Users,
-    title: "Communauté",
-    description: "Une famille spirituelle unie",
+    title: "Communion Fraternelle",
+    description: "Une famille de croyants unis par l'amour de la Verite",
   },
   {
     icon: Church,
-    title: "Adoration",
-    description: "Glorifier Dieu en esprit et en vérité",
+    title: "Vie de Saintete",
+    description: "Une marche quotidienne guidee par le Saint-Esprit",
   },
 ]
 
@@ -57,8 +57,8 @@ export function AboutSection() {
                     <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
                       <span className="font-serif text-5xl font-bold text-primary">JM</span>
                     </div>
-                    <h3 className="font-serif text-2xl font-bold text-foreground">Pasteur Joel Mugisho</h3>
-                    <p className="text-muted-foreground mt-2">Fondateur &amp; Pasteur Principal</p>
+                    <h3 className="font-serif text-2xl font-bold text-foreground">Pasteur Joel Mugisho Balagizi</h3>
+                    <p className="text-muted-foreground mt-2">Pasteur Principal</p>
                   </div>
                 </div>
               </div>
@@ -90,20 +90,21 @@ export function AboutSection() {
                 transition={{ delay: 0.3 }}
                 className="text-primary font-medium mb-4 tracking-wider uppercase text-sm"
               >
-                Notre Histoire
+                L&apos;Identite de l&apos;Epouse
               </motion.p>
               <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-                Une vision pour transformer des vies
+                Plenitude Tabernacle
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed text-pretty">
-                Fondée au cœur de Kinshasa, Plénitude Tabernacle est née d&apos;une vision : 
-                créer un lieu où chaque personne peut expérimenter la présence de Dieu et 
-                découvrir son plein potentiel en Christ.
+                Plenitude Tabernacle est une assemblee de croyants devoues au Message du Temps 
+                de la Fin, tel que restitue par le ministere prophetique de William Marion Branham, 
+                le messager d&apos;Apocalypse 10:7 et de Malachie 4:5-6.
               </p>
               <p className="text-lg text-muted-foreground leading-relaxed mt-4 text-pretty">
-                Sous la direction spirituelle du Pasteur Joel Mugisho, notre église s&apos;est 
-                développée pour devenir une communauté vibrante, engagée dans l&apos;enseignement 
-                de la Parole et le service envers les autres.
+                Notre eglise n&apos;est pas une denomination, mais un lieu de rassemblement pour ceux 
+                qui aspirent a la maturite spirituelle et a la pleine stature de Christ. Nous croyons 
+                que nous vivons l&apos;age de l&apos;Aigle, ou les mysteres scelles depuis la fondation 
+                du monde sont maintenant devoiles pour preparer l&apos;Epouse a l&apos;Enlevement.
               </p>
             </div>
 

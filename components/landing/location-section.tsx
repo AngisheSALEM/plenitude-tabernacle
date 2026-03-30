@@ -6,9 +6,9 @@ import { useRef } from "react"
 import { MapPin, Clock, Phone, Mail, Calendar } from "lucide-react"
 
 const schedule = [
-  { day: "Dimanche", time: "09h00 - 12h00", event: "Culte Principal" },
-  { day: "Mercredi", time: "18h00 - 20h00", event: "Étude Biblique" },
-  { day: "Vendredi", time: "18h00 - 21h00", event: "Veillée de Prière" },
+  { day: "Mardi", time: "17h30 - 19h30", event: "Culte" },
+  { day: "Vendredi", time: "17h30 - 19h30", event: "Culte" },
+  { day: "Dimanche", time: "09h00 - 11h30", event: "Culte Principal" },
 ]
 
 export function LocationSection() {
