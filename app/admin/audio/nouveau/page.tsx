@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
-  Headphones, 
   Upload,
   Image as ImageIcon,
   ArrowLeft,
@@ -28,6 +28,7 @@ import {
 import Link from "next/link"
 
 export default function NewAudioPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,6 +38,8 @@ export default function NewAudioPage() {
   })
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -57,11 +60,38 @@ export default function NewAudioPage() {
   }
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return "0 Bytes"
     const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const sizes = ["Bytes", "KB", "MB", "GB"]
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
+
+  const handlePublish = async () => {
+    if (!formData.title || !formData.category) {
+      setError("Le titre et la categorie sont obligatoires")
+      return
+    }
+    setIsLoading(true)
+    setError("")
+    const res = await fetch("/api/audio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: formData.title,
+        description: formData.description || null,
+        speaker: formData.speaker,
+        category: formData.category,
+        isFeatured: formData.isFeatured,
+      }),
+    })
+    setIsLoading(false)
+    if (res.ok) {
+      router.push("/admin/audio")
+    } else {
+      const data = await res.json()
+      setError(data.error || "Erreur lors de la publication")
+    }
   }
 
   return (
@@ -82,6 +112,12 @@ export default function NewAudioPage() {
           </p>
         </div>
       </div>
+
+      {error && (
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Form */}
@@ -126,8 +162,8 @@ export default function NewAudioPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">Categorie</Label>
-                  <Select 
-                    value={formData.category} 
+                  <Select
+                    value={formData.category}
                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                   >
                     <SelectTrigger className="bg-background border-border">
@@ -182,9 +218,9 @@ export default function NewAudioPage() {
                       <p className="text-sm font-medium text-foreground">Cliquez pour uploader</p>
                       <p className="text-xs text-muted-foreground mt-1">MP3 jusqu&apos;a 100MB</p>
                     </div>
-                    <input 
-                      type="file" 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      className="hidden"
                       accept="audio/mp3,audio/mpeg"
                       onChange={handleAudioChange}
                     />
@@ -203,9 +239,9 @@ export default function NewAudioPage() {
               <div className="space-y-4">
                 {thumbnailPreview ? (
                   <div className="relative aspect-square max-w-xs rounded-lg overflow-hidden bg-muted">
-                    <img 
-                      src={thumbnailPreview} 
-                      alt="Thumbnail preview" 
+                    <img
+                      src={thumbnailPreview}
+                      alt="Thumbnail preview"
                       className="w-full h-full object-cover"
                     />
                     <Button
@@ -226,9 +262,9 @@ export default function NewAudioPage() {
                       <p className="text-sm font-medium text-foreground">Ajouter une image</p>
                       <p className="text-xs text-muted-foreground mt-1">PNG, JPG (500x500)</p>
                     </div>
-                    <input 
-                      type="file" 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      className="hidden"
                       accept="image/*"
                       onChange={handleThumbnailChange}
                     />
@@ -256,14 +292,15 @@ export default function NewAudioPage() {
                   onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: checked })}
                 />
               </div>
-              
+
               <div className="pt-4 space-y-2">
-                <Button 
+                <Button
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  disabled={!audioFile || !formData.title}
+                  disabled={isLoading || !formData.title || !formData.category}
+                  onClick={handlePublish}
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  Publier
+                  {isLoading ? "Publication..." : "Publier"}
                 </Button>
                 <Button variant="outline" className="w-full border-border">
                   <Eye className="mr-2 h-4 w-4" />

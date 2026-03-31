@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Video, 
@@ -15,7 +15,7 @@ import {
   Grid,
   List
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -33,91 +33,56 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import Link from "next/link"
-import { cn } from "@/lib/utils"
 
-const videos = [
-  {
-    id: 1,
-    title: "La puissance de la resurrection",
-    description: "Une predication puissante sur la victoire de Christ",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-28",
-    views: 1234,
-    duration: "45:30",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: true,
-    category: "Predication"
-  },
-  {
-    id: 2,
-    title: "Les promesses de Dieu",
-    description: "Decouvrez les promesses eternelles de notre Pere celeste",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-25",
-    views: 987,
-    duration: "38:15",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: false,
-    category: "Enseignement"
-  },
-  {
-    id: 3,
-    title: "La foi qui deplace les montagnes",
-    description: "Comment activer une foi victorieuse",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-22",
-    views: 2341,
-    duration: "52:00",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: false,
-    category: "Predication"
-  },
-  {
-    id: 4,
-    title: "La grace suffisante",
-    description: "La grace de Dieu dans nos faiblesses",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-20",
-    views: 1567,
-    duration: "41:45",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: false,
-    category: "Enseignement"
-  },
-  {
-    id: 5,
-    title: "Nuit de louange - Mars 2026",
-    description: "Moment de louange et adoration",
-    speaker: "Chorale Plenitude",
-    date: "2026-03-15",
-    views: 3210,
-    duration: "1:25:00",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: false,
-    category: "Louange"
-  },
-  {
-    id: 6,
-    title: "Le bapteme du Saint-Esprit",
-    description: "Comprendre le bapteme de l&apos;Esprit",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-10",
-    views: 1890,
-    duration: "48:30",
-    thumbnail: "/api/placeholder/320/180",
-    isFeatured: false,
-    category: "Enseignement"
-  },
-]
+interface AdminVideo {
+  id: string
+  title: string
+  description: string | null
+  speaker: string
+  date: string
+  views: number
+  duration: string | null
+  thumbnail: string | null
+  isFeatured: boolean
+  category: string
+}
 
 export default function AdminVideosPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const [videos, setVideos] = useState<AdminVideo[]>([])
 
-  const filteredVideos = videos.filter(video => {
-    const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         video.speaker.toLowerCase().includes(searchQuery.toLowerCase())
+  const fetchVideos = () => {
+    fetch("/api/videos?limit=100")
+      .then((r) => r.json())
+      .then((data) => setVideos(data.videos ?? []))
+      .catch(console.error)
+  }
+
+  useEffect(() => {
+    fetchVideos()
+  }, [])
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cette video ?")) return
+    await fetch(`/api/videos/${id}`, { method: "DELETE" })
+    fetchVideos()
+  }
+
+  const handleToggleFeatured = async (video: AdminVideo) => {
+    await fetch(`/api/videos/${video.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isFeatured: !video.isFeatured }),
+    })
+    fetchVideos()
+  }
+
+  const filteredVideos = videos.filter((video) => {
+    const matchesSearch =
+      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      video.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = categoryFilter === "all" || video.category === categoryFilter
     return matchesSearch && matchesCategory
   })
@@ -203,9 +168,11 @@ export default function AdminVideosPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center">
                     <Video className="h-12 w-12 text-primary/50" />
                   </div>
-                  <div className="absolute bottom-2 right-2 px-2 py-1 bg-background/90 rounded text-xs font-medium text-foreground">
-                    {video.duration}
-                  </div>
+                  {video.duration && (
+                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-background/90 rounded text-xs font-medium text-foreground">
+                      {video.duration}
+                    </div>
+                  )}
                   {video.isFeatured && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-primary rounded text-xs font-medium text-primary-foreground flex items-center gap-1">
                       <Star className="h-3 w-3" />
@@ -223,7 +190,7 @@ export default function AdminVideosPage() {
                           <Eye className="h-3 w-3" />
                           {video.views}
                         </span>
-                        <span>{new Date(video.date).toLocaleDateString('fr-FR')}</span>
+                        <span>{new Date(video.date).toLocaleDateString("fr-FR")}</span>
                         <span className="px-2 py-0.5 bg-muted rounded-full">{video.category}</span>
                       </div>
                     </div>
@@ -238,12 +205,12 @@ export default function AdminVideosPage() {
                           <Edit className="mr-2 h-4 w-4" />
                           Modifier
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleFeatured(video)}>
                           <Star className="mr-2 h-4 w-4" />
                           {video.isFeatured ? "Retirer de la une" : "Mettre a la une"}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(video.id)}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           Supprimer
                         </DropdownMenuItem>
@@ -260,7 +227,7 @@ export default function AdminVideosPage() {
           <CardContent className="p-0">
             <div className="divide-y divide-border">
               {filteredVideos.map((video) => (
-                <div 
+                <div
                   key={video.id}
                   className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
                 >
@@ -268,9 +235,11 @@ export default function AdminVideosPage() {
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center">
                       <Video className="h-6 w-6 text-primary/50" />
                     </div>
-                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-background/90 rounded text-xs font-medium text-foreground">
-                      {video.duration}
-                    </div>
+                    {video.duration && (
+                      <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-background/90 rounded text-xs font-medium text-foreground">
+                        {video.duration}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -286,7 +255,7 @@ export default function AdminVideosPage() {
                         <Eye className="h-3 w-3" />
                         {video.views} vues
                       </span>
-                      <span>{new Date(video.date).toLocaleDateString('fr-FR')}</span>
+                      <span>{new Date(video.date).toLocaleDateString("fr-FR")}</span>
                       <span className="px-2 py-0.5 bg-muted rounded-full text-xs">{video.category}</span>
                     </div>
                   </div>
@@ -301,12 +270,12 @@ export default function AdminVideosPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleFeatured(video)}>
                           <Star className="mr-2 h-4 w-4" />
                           {video.isFeatured ? "Retirer de la une" : "Mettre a la une"}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(video.id)}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           Supprimer
                         </DropdownMenuItem>

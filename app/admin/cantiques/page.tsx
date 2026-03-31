@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Book, 
@@ -11,7 +11,6 @@ import {
   Eye,
   Save,
   X,
-  ChevronDown,
   Music
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -44,39 +43,19 @@ import {
 } from "@/components/ui/table"
 
 const categories = [
-  "Adoration",
-  "Amour",
-  "Aspiration",
-  "Benediction",
-  "Ciel",
-  "Combat spirituel",
-  "Communion",
-  "Confiance",
-  "Consecration",
-  "Delivrance",
-  "Esperance",
-  "Foi",
-  "Grace",
-  "Jesus",
-  "Louange",
-  "Marche",
-  "Mission",
-  "Priere",
-  "Redemption",
-  "Refuge",
-  "Saint-Esprit",
-  "Soumission",
-  "Temoignage"
+  "Adoration", "Amour", "Aspiration", "Benediction", "Ciel",
+  "Combat spirituel", "Communion", "Confiance", "Consecration", "Delivrance",
+  "Esperance", "Foi", "Grace", "Jesus", "Louange",
+  "Marche", "Mission", "Priere", "Redemption", "Refuge",
+  "Saint-Esprit", "Soumission", "Temoignage"
 ]
 
-// Sample existing cantiques for display
-const existingCantiques = [
-  { id: 1, title: "A TOI LA GLOIRE", reference: "Crois seulement 1", category: "Louange" },
-  { id: 2, title: "JE LOUERAI L'ETERNEL", reference: "Crois seulement 5", category: "Louange" },
-  { id: 3, title: "TOURNE LES YEUX VERS JESUS", reference: "Crois seulement 10", category: "Foi" },
-  { id: 4, title: "TEL QUE JE SUIS", reference: "Crois seulement 15", category: "Grace" },
-  { id: 5, title: "QUEL AMI FIDELE ET TENDRE", reference: "Crois seulement 75", category: "Amour" },
-]
+interface Cantique {
+  id: string
+  title: string
+  reference: string
+  category: string
+}
 
 interface CantiqueForm {
   title: string
@@ -95,80 +74,83 @@ const emptyForm: CantiqueForm = {
 }
 
 export default function AdminCantiquesPage() {
-  const [cantiques, setCantiques] = useState(existingCantiques)
+  const [cantiques, setCantiques] = useState<Cantique[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Toutes")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false)
-  const [selectedCantique, setSelectedCantique] = useState<typeof existingCantiques[0] | null>(null)
+  const [selectedCantique, setSelectedCantique] = useState<Cantique | null>(null)
   const [formData, setFormData] = useState<CantiqueForm>(emptyForm)
   const [successMessage, setSuccessMessage] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
 
-  const filteredCantiques = cantiques.filter(c => {
-    const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const fetchCantiques = () => {
+    fetch("/api/cantiques?limit=500")
+      .then((r) => r.json())
+      .then((data) => setCantiques(data.cantiques ?? []))
+      .catch(console.error)
+  }
+
+  useEffect(() => {
+    fetchCantiques()
+  }, [])
+
+  const filteredCantiques = cantiques.filter((c) => {
+    const matchesSearch =
+      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.reference.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "Toutes" || c.category === selectedCategory
     return matchesSearch && matchesCategory
   })
 
   const handleAddVerse = () => {
-    setFormData(prev => ({
-      ...prev,
-      verses: [...prev.verses, ""]
-    }))
+    setFormData((prev) => ({ ...prev, verses: [...prev.verses, ""] }))
   }
 
   const handleRemoveVerse = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      verses: prev.verses.filter((_, i) => i !== index)
-    }))
+    setFormData((prev) => ({ ...prev, verses: prev.verses.filter((_, i) => i !== index) }))
   }
 
   const handleVerseChange = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      verses: prev.verses.map((v, i) => i === index ? value : v)
-    }))
+    setFormData((prev) => ({ ...prev, verses: prev.verses.map((v, i) => (i === index ? value : v)) }))
   }
 
   const handleChorusChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      chorus: [value]
-    }))
+    setFormData((prev) => ({ ...prev, chorus: [value] }))
   }
 
-  const handleSubmit = () => {
-    // Validate form
-    if (!formData.title || !formData.reference || !formData.category || formData.verses.every(v => !v.trim())) {
-      return
-    }
-
-    const newCantique = {
-      id: cantiques.length + 1,
-      title: formData.title.toUpperCase(),
-      reference: formData.reference,
-      category: formData.category
-    }
-
-    setCantiques(prev => [...prev, newCantique])
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.reference || !formData.category || formData.verses.every((v) => !v.trim())) return
+    setIsSaving(true)
+    await fetch("/api/cantiques", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: formData.title.toUpperCase(),
+        reference: formData.reference,
+        category: formData.category,
+        lyrics: formData.verses.filter((v) => v.trim()),
+        chorus: formData.chorus[0]?.trim() ? formData.chorus : null,
+      }),
+    })
+    setIsSaving(false)
     setFormData(emptyForm)
     setIsAddDialogOpen(false)
     setSuccessMessage("Cantique ajoute avec succes!")
     setTimeout(() => setSuccessMessage(""), 3000)
+    fetchCantiques()
   }
 
-  const handleDelete = () => {
-    if (selectedCantique) {
-      setCantiques(prev => prev.filter(c => c.id !== selectedCantique.id))
-      setIsDeleteDialogOpen(false)
-      setSelectedCantique(null)
-      setSuccessMessage("Cantique supprime avec succes!")
-      setTimeout(() => setSuccessMessage(""), 3000)
-    }
+  const handleDelete = async () => {
+    if (!selectedCantique) return
+    await fetch(`/api/cantiques/${selectedCantique.id}`, { method: "DELETE" })
+    setIsDeleteDialogOpen(false)
+    setSelectedCantique(null)
+    setSuccessMessage("Cantique supprime avec succes!")
+    setTimeout(() => setSuccessMessage(""), 3000)
+    fetchCantiques()
   }
 
   const openAddDialog = () => {
@@ -240,8 +222,10 @@ export default function AdminCantiquesPage() {
                 <Plus className="h-6 w-6 text-green-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">3</p>
-                <p className="text-sm text-muted-foreground">Ajoutes ce mois</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {cantiques.filter((c) => new Date(c as any).getMonth?.() === new Date().getMonth()).length || cantiques.length}
+                </p>
+                <p className="text-sm text-muted-foreground">Dans le recueil</p>
               </div>
             </div>
           </CardContent>
@@ -267,7 +251,7 @@ export default function AdminCantiquesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Toutes">Toutes les categories</SelectItem>
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
               </SelectContent>
@@ -295,9 +279,9 @@ export default function AdminCantiquesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCantiques.map((cantique) => (
+              {filteredCantiques.map((cantique, idx) => (
                 <TableRow key={cantique.id}>
-                  <TableCell className="font-medium">{cantique.id}</TableCell>
+                  <TableCell className="font-medium">{idx + 1}</TableCell>
                   <TableCell className="font-medium">{cantique.title}</TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">{cantique.reference}</TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -360,7 +344,6 @@ export default function AdminCantiquesPage() {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            {/* Basic Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Titre du cantique *</Label>
@@ -368,7 +351,7 @@ export default function AdminCantiquesPage() {
                   id="title"
                   placeholder="Ex: A TOI LA GLOIRE"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
@@ -377,22 +360,22 @@ export default function AdminCantiquesPage() {
                   id="reference"
                   placeholder="Ex: Crois seulement 1"
                   value={formData.reference}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>Categorie *</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selectionnez une categorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map(cat => (
+                  {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
@@ -425,7 +408,7 @@ export default function AdminCantiquesPage() {
                     )}
                   </div>
                   <Textarea
-                    placeholder="Entrez les paroles du couplet (une ligne par vers, utilisez \n pour les sauts de ligne)"
+                    placeholder="Entrez les paroles du couplet"
                     value={verse}
                     onChange={(e) => handleVerseChange(index, e.target.value)}
                     rows={4}
@@ -444,35 +427,15 @@ export default function AdminCantiquesPage() {
                 rows={4}
               />
             </div>
-
-            {/* Format Example */}
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm font-medium text-foreground mb-2">Format attendu :</p>
-              <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
-{`{
-  id: 1,
-  title: "A TOI LA GLOIRE",
-  reference: "Crois seulement 1",
-  category: "Louange",
-  lyrics: [
-    "Couplet 1 ligne 1,\\nCouplet 1 ligne 2,\\n...",
-    "Couplet 2 ligne 1,\\nCouplet 2 ligne 2,\\n..."
-  ],
-  chorus: [
-    "Refrain ligne 1,\\nRefrain ligne 2,\\n..."
-  ]
-}`}
-              </pre>
-            </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Annuler
             </Button>
-            <Button onClick={handleSubmit}>
+            <Button onClick={handleSubmit} disabled={isSaving}>
               <Save className="mr-2 h-4 w-4" />
-              Enregistrer
+              {isSaving ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Chrome, User } from "lucide-react"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,6 +16,7 @@ export default function InscriptionPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,20 +28,38 @@ export default function InscriptionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (formData.password !== formData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas")
+      setError("Les mots de passe ne correspondent pas")
       return
     }
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    setError("")
+    const res = await fetch("/api/inscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setIsLoading(false)
+      setError(data.error || "Erreur lors de la creation du compte")
+      return
+    }
+    await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false,
+    })
     setIsLoading(false)
     router.push("/espace-membre")
   }
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    router.push("/espace-membre")
+    await signIn("google", { callbackUrl: "/espace-membre" })
   }
 
   return (
@@ -141,6 +161,12 @@ export default function InscriptionPage() {
               </span>
             </div>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

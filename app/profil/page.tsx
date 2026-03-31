@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
   ArrowLeft, User, Mail, Phone, MapPin, Calendar, 
   Camera, Edit2, Save, X, Heart, Download, Play,
   Video, Headphones, Book, CheckCircle, Shield, LogOut
 } from "lucide-react"
+import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,65 +26,161 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-// Mock user data
-const mockUser = {
-  id: 1,
-  firstName: "Jean",
-  lastName: "Mukendi",
-  email: "jean.mukendi@example.com",
-  phone: "+243 999 123 456",
-  address: "Kinshasa, Gombe",
-  birthDate: "1985-05-15",
-  joinDate: "2022-01-10",
-  bio: "Membre fidele depuis 2022. Serviteur dans le ministere de la louange.",
-  avatar: null,
+interface ProfileUser {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  address: string
+  birthDate: string
+  joinDate: string
+  bio: string
+  avatar: string | null
   stats: {
-    videosWatched: 45,
-    audioListened: 120,
-    favorites: 23,
-    downloads: 18
+    videosWatched: number
+    audioListened: number
+    favorites: number
+    downloads: number
   }
 }
 
-// Mock favorites
-const mockFavorites = {
-  videos: [
-    { id: 1, title: "La puissance de la foi", speaker: "Pasteur Joel Mugisho", date: "2024-03-15" },
-    { id: 2, title: "Marcher dans l'amour divin", speaker: "Pasteur Joel Mugisho", date: "2024-03-10" },
-  ],
-  audio: [
-    { id: 1, title: "Meditations du matin - Psaume 23", speaker: "Pasteur Joel Mugisho", date: "2024-03-18" },
-    { id: 2, title: "La sagesse de Dieu", speaker: "Pasteur Joel Mugisho", date: "2024-03-12" },
-  ],
-  cantiques: [
-    { id: 1, title: "CROIS SEULEMENT", reference: "Crois seulement 1" },
-    { id: 9, title: "J'ABANDONNE", reference: "Crois seulement 25" },
-    { id: 6, title: "NOUS MARCHONS VERS SION", reference: "Crois seulement 15" },
-  ]
+interface FavoriteItem {
+  id: string
+  title: string
+  speaker?: string
+  reference?: string
+  date?: string
+}
+
+interface Favorites {
+  videos: FavoriteItem[]
+  audio: FavoriteItem[]
+  cantiques: FavoriteItem[]
+}
+
+const defaultUser: ProfileUser = {
+  id: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  address: "",
+  birthDate: "",
+  joinDate: new Date().toISOString(),
+  bio: "",
+  avatar: null,
+  stats: { videosWatched: 0, audioListened: 0, favorites: 0, downloads: 0 }
 }
 
 export default function ProfilPage() {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
-  const [user, setUser] = useState(mockUser)
+  const [isSaving, setIsSaving] = useState(false)
+  const [user, setUser] = useState<ProfileUser>(defaultUser)
   const [editForm, setEditForm] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    phone: user.phone,
-    address: user.address,
-    bio: user.bio
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    bio: ""
   })
+  const [favorites, setFavorites] = useState<Favorites>({ videos: [], audio: [], cantiques: [] })
 
-  const handleSave = () => {
-    setUser({ ...user, ...editForm })
-    setIsEditing(false)
+  useEffect(() => {
+    fetch("/api/profil")
+      .then((r) => {
+        if (!r.ok) throw new Error("Non autorise")
+        return r.json()
+      })
+      .then((data) => {
+        const u = data.user
+        const favVideos: FavoriteItem[] = (u.favoriteVideos ?? []).map((f: any) => ({
+          id: f.video?.id ?? f.videoId,
+          title: f.video?.title ?? "Video",
+          speaker: f.video?.speaker ?? "",
+          date: f.video?.date ?? "",
+        }))
+        const favAudio: FavoriteItem[] = (u.favoriteAudios ?? []).map((f: any) => ({
+          id: f.audio?.id ?? f.audioId,
+          title: f.audio?.title ?? "Audio",
+          speaker: f.audio?.speaker ?? "",
+          date: f.audio?.date ?? "",
+        }))
+        const favCantiques: FavoriteItem[] = (u.favoriteCantiques ?? []).map((f: any) => ({
+          id: f.cantique?.id ?? f.cantiqueId,
+          title: f.cantique?.title ?? "Cantique",
+          reference: f.cantique?.reference ?? "",
+        }))
+        setFavorites({ videos: favVideos, audio: favAudio, cantiques: favCantiques })
+        const profile: ProfileUser = {
+          id: u.id,
+          firstName: u.firstName ?? "",
+          lastName: u.lastName ?? "",
+          email: u.email ?? "",
+          phone: u.phone ?? "",
+          address: u.address ?? "",
+          birthDate: u.birthDate ?? "",
+          joinDate: u.joinDate ?? u.createdAt ?? new Date().toISOString(),
+          bio: u.bio ?? "",
+          avatar: u.avatar ?? null,
+          stats: {
+            videosWatched: 0,
+            audioListened: 0,
+            favorites: favVideos.length + favAudio.length + favCantiques.length,
+            downloads: 0,
+          }
+        }
+        setUser(profile)
+        setEditForm({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          email: profile.email,
+          phone: profile.phone,
+          address: profile.address,
+          bio: profile.bio,
+        })
+      })
+      .catch(() => {
+        router.push("/connexion")
+      })
+  }, [])
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    const res = await fetch("/api/profil", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editForm),
+    })
+    setIsSaving(false)
+    if (res.ok) {
+      const data = await res.json()
+      const u = data.user
+      setUser((prev) => ({
+        ...prev,
+        firstName: u.firstName ?? prev.firstName,
+        lastName: u.lastName ?? prev.lastName,
+        email: u.email ?? prev.email,
+        phone: u.phone ?? prev.phone,
+        address: u.address ?? prev.address,
+        bio: u.bio ?? prev.bio,
+      }))
+      setIsEditing(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/connexion" })
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    if (!dateString) return "—"
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     })
   }
 
@@ -132,7 +230,7 @@ export default function ProfilPage() {
                     <img src={user.avatar} alt={user.firstName} className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <span className="font-serif text-4xl md:text-5xl font-bold text-primary">
-                      {user.firstName[0]}{user.lastName[0]}
+                      {user.firstName?.[0]}{user.lastName?.[0]}
                     </span>
                   )}
                 </div>
@@ -159,7 +257,7 @@ export default function ProfilPage() {
                       </span>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setIsEditing(!isEditing)}
                     variant={isEditing ? "outline" : "default"}
                   >
@@ -266,9 +364,9 @@ export default function ProfilPage() {
                 <Button variant="outline" onClick={() => setIsEditing(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleSave}>
+                <Button onClick={handleSave} disabled={isSaving}>
                   <Save className="mr-2 h-4 w-4" />
-                  Enregistrer
+                  {isSaving ? "Enregistrement..." : "Enregistrer"}
                 </Button>
               </div>
             </motion.div>
@@ -283,9 +381,9 @@ export default function ProfilPage() {
                 {[
                   { icon: User, label: "Nom complet", value: `${user.firstName} ${user.lastName}` },
                   { icon: Mail, label: "Email", value: user.email },
-                  { icon: Phone, label: "Telephone", value: user.phone },
-                  { icon: MapPin, label: "Adresse", value: user.address },
-                  { icon: Calendar, label: "Date de naissance", value: formatDate(user.birthDate) },
+                  { icon: Phone, label: "Telephone", value: user.phone || "—" },
+                  { icon: MapPin, label: "Adresse", value: user.address || "—" },
+                  { icon: Calendar, label: "Date de naissance", value: user.birthDate ? formatDate(user.birthDate) : "—" },
                   { icon: Calendar, label: "Membre depuis", value: formatDate(user.joinDate) },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -321,20 +419,22 @@ export default function ProfilPage() {
               <TabsList className="bg-secondary p-1 rounded-full w-fit">
                 <TabsTrigger value="videos" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Video className="mr-2 h-4 w-4" />
-                  Videos ({mockFavorites.videos.length})
+                  Videos ({favorites.videos.length})
                 </TabsTrigger>
                 <TabsTrigger value="audio" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Headphones className="mr-2 h-4 w-4" />
-                  Audio ({mockFavorites.audio.length})
+                  Audio ({favorites.audio.length})
                 </TabsTrigger>
                 <TabsTrigger value="cantiques" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Book className="mr-2 h-4 w-4" />
-                  Cantiques ({mockFavorites.cantiques.length})
+                  Cantiques ({favorites.cantiques.length})
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="videos" className="space-y-3">
-                {mockFavorites.videos.map((video) => (
+                {favorites.videos.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">Aucune video en favori</p>
+                ) : favorites.videos.map((video) => (
                   <div key={video.id} className="flex items-center gap-4 p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Play className="h-5 w-5 text-primary ml-0.5" />
@@ -351,7 +451,9 @@ export default function ProfilPage() {
               </TabsContent>
 
               <TabsContent value="audio" className="space-y-3">
-                {mockFavorites.audio.map((audio) => (
+                {favorites.audio.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">Aucun audio en favori</p>
+                ) : favorites.audio.map((audio) => (
                   <div key={audio.id} className="flex items-center gap-4 p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Headphones className="h-5 w-5 text-primary" />
@@ -368,7 +470,9 @@ export default function ProfilPage() {
               </TabsContent>
 
               <TabsContent value="cantiques" className="space-y-3">
-                {mockFavorites.cantiques.map((cantique) => (
+                {favorites.cantiques.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">Aucun cantique en favori</p>
+                ) : favorites.cantiques.map((cantique) => (
                   <Link key={cantique.id} href="/cantiques">
                     <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -419,9 +523,9 @@ export default function ProfilPage() {
                   </DialogHeader>
                   <DialogFooter>
                     <Button variant="outline">Annuler</Button>
-                    <Link href="/connexion">
-                      <Button variant="destructive">Se deconnecter</Button>
-                    </Link>
+                    <Button variant="destructive" onClick={handleLogout}>
+                      Se deconnecter
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

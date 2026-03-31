@@ -1,12 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Play, Clock, User, Search, Grid, List, Calendar, Share2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
+import { formatDate } from "@/lib/format"
 
 const categories = [
   "Toutes",
@@ -17,99 +18,43 @@ const categories = [
   "Conferences",
 ]
 
-const videos = [
-  {
-    id: 1,
-    title: "La Puissance de la Resurrection",
-    speaker: "Pasteur Joel Mugisho",
-    date: "24 Mars 2026",
-    duration: "1h 15min",
-    category: "Predications",
-    description: "Decouvrez la puissance transformatrice de la resurrection de Jesus-Christ et son impact dans notre vie quotidienne.",
-  },
-  {
-    id: 2,
-    title: "Marcher dans la Foi",
-    speaker: "Pasteur Joel Mugisho",
-    date: "17 Mars 2026",
-    duration: "58min",
-    category: "Enseignements",
-    description: "Comment developper une foi inebranlable face aux defis de la vie.",
-  },
-  {
-    id: 3,
-    title: "Les Promesses de Dieu",
-    speaker: "Pasteur Joel Mugisho",
-    date: "10 Mars 2026",
-    duration: "1h 05min",
-    category: "Predications",
-    description: "Les promesses divines sont un ancrage pour notre ame dans les temps difficiles.",
-  },
-  {
-    id: 4,
-    title: "Adoration en Esprit et en Verite",
-    speaker: "Chorale Plenitude",
-    date: "3 Mars 2026",
-    duration: "45min",
-    category: "Louange",
-    description: "Un moment de louange et d'adoration intense avec la chorale de Plenitude Tabernacle.",
-  },
-  {
-    id: 5,
-    title: "Temoignage de Guerison",
-    speaker: "Frere Emmanuel",
-    date: "25 Fevrier 2026",
-    duration: "32min",
-    category: "Temoignages",
-    description: "Un temoignage puissant de guerison miraculeuse apres 10 ans de maladie.",
-  },
-  {
-    id: 6,
-    title: "Conference sur la Famille",
-    speaker: "Pasteur Joel Mugisho",
-    date: "18 Fevrier 2026",
-    duration: "2h 30min",
-    category: "Conferences",
-    description: "Comment batir une famille solide sur les fondements bibliques.",
-  },
-  {
-    id: 7,
-    title: "La Grace Suffisante",
-    speaker: "Pasteur Joel Mugisho",
-    date: "11 Fevrier 2026",
-    duration: "1h 02min",
-    category: "Predications",
-    description: "Comprendre la grace de Dieu qui nous suffit dans toutes les circonstances.",
-  },
-  {
-    id: 8,
-    title: "Louange du Dimanche",
-    speaker: "Chorale Plenitude",
-    date: "4 Fevrier 2026",
-    duration: "55min",
-    category: "Louange",
-    description: "Compilation des meilleurs moments de louange du mois de fevrier.",
-  },
-  {
-    id: 9,
-    title: "Le Combat Spirituel",
-    speaker: "Pasteur Joel Mugisho",
-    date: "28 Janvier 2026",
-    duration: "1h 20min",
-    category: "Enseignements",
-    description: "Les armes spirituelles pour remporter la victoire dans nos combats.",
-  },
-]
+interface Video {
+  id: string
+  title: string
+  speaker: string
+  date: string
+  duration: string | null
+  category: string
+  description: string | null
+}
+
+const categoryMap: Record<string, string> = {
+  Predication: "Predications",
+  Enseignement: "Enseignements",
+  Louange: "Louange",
+  Temoignage: "Temoignages",
+  Conference: "Conferences",
+}
 
 export default function VideosPage() {
   const [selectedCategory, setSelectedCategory] = useState("Toutes")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedVideo, setSelectedVideo] = useState<typeof videos[0] | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [videos, setVideos] = useState<Video[]>([])
+
+  useEffect(() => {
+    fetch("/api/videos?limit=50")
+      .then((r) => r.json())
+      .then((data) => setVideos(data.videos ?? []))
+      .catch(console.error)
+  }, [])
 
   const filteredVideos = videos.filter((video) => {
-    const matchesCategory = selectedCategory === "Toutes" || video.category === selectedCategory
-    const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const displayCat = categoryMap[video.category] ?? video.category
+    const matchesCategory = selectedCategory === "Toutes" || displayCat === selectedCategory
+    const matchesSearch =
+      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       video.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
@@ -241,9 +186,11 @@ export default function VideosPage() {
                     </div>
                     
                     {/* Duration badge */}
-                    <div className="absolute bottom-3 right-3 px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm text-xs font-medium text-foreground">
-                      {video.duration}
-                    </div>
+                    {video.duration && (
+                      <div className="absolute bottom-3 right-3 px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm text-xs font-medium text-foreground">
+                        {video.duration}
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
@@ -260,7 +207,7 @@ export default function VideosPage() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {video.date}
+                        {formatDate(video.date)}
                       </span>
                     </div>
                   </div>
@@ -286,9 +233,11 @@ export default function VideosPage() {
                         <Play className="h-5 w-5 text-primary-foreground fill-current" />
                       </div>
                     </div>
-                    <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-background/80 text-xs">
-                      {video.duration}
-                    </div>
+                    {video.duration && (
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-background/80 text-xs">
+                        {video.duration}
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
@@ -311,7 +260,7 @@ export default function VideosPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {video.date}
+                        {formatDate(video.date)}
                       </span>
                     </div>
                   </div>
@@ -382,12 +331,14 @@ export default function VideosPage() {
                 </span>
                 <span className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {selectedVideo.date}
+                  {formatDate(selectedVideo.date)}
                 </span>
-                <span className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {selectedVideo.duration}
-                </span>
+                {selectedVideo.duration && (
+                  <span className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {selectedVideo.duration}
+                  </span>
+                )}
               </div>
             </div>
           </motion.div>

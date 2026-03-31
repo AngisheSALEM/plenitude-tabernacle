@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Chrome } from "lucide-react"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,6 +16,7 @@ export default function ConnexionPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,18 +26,24 @@ export default function ConnexionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    setError("")
+    const result = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      rememberMe: formData.rememberMe.toString(),
+      redirect: false,
+    })
     setIsLoading(false)
-    router.push("/espace-membre")
+    if (result?.ok) {
+      router.push("/espace-membre")
+    } else {
+      setError("Email ou mot de passe incorrect")
+    }
   }
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
-    // Simulate Google login
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    router.push("/espace-membre")
+    await signIn("google", { callbackUrl: "/espace-membre" })
   }
 
   return (
@@ -96,6 +104,12 @@ export default function ConnexionPage() {
               </span>
             </div>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">

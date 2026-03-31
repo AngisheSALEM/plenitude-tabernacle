@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
-  Video, 
-  Upload,
   Link as LinkIcon,
   Image as ImageIcon,
   ArrowLeft,
@@ -25,8 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import Link from "next/link"
+import { Play } from "lucide-react"
 
 export default function NewVideoPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -36,6 +37,8 @@ export default function NewVideoPage() {
     isFeatured: false
   })
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -55,6 +58,34 @@ export default function NewVideoPage() {
 
   const youtubeId = extractYouTubeId(formData.videoUrl)
 
+  const handlePublish = async () => {
+    if (!formData.title || !formData.category) {
+      setError("Le titre et la categorie sont obligatoires")
+      return
+    }
+    setIsLoading(true)
+    setError("")
+    const res = await fetch("/api/videos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: formData.title,
+        description: formData.description || null,
+        speaker: formData.speaker,
+        category: formData.category,
+        youtubeUrl: formData.videoUrl || null,
+        isFeatured: formData.isFeatured,
+      }),
+    })
+    setIsLoading(false)
+    if (res.ok) {
+      router.push("/admin/videos")
+    } else {
+      const data = await res.json()
+      setError(data.error || "Erreur lors de la publication")
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
@@ -73,6 +104,12 @@ export default function NewVideoPage() {
           </p>
         </div>
       </div>
+
+      {error && (
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Form */}
@@ -117,8 +154,8 @@ export default function NewVideoPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">Categorie</Label>
-                  <Select 
-                    value={formData.category} 
+                  <Select
+                    value={formData.category}
                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                   >
                     <SelectTrigger className="bg-background border-border">
@@ -157,7 +194,6 @@ export default function NewVideoPage() {
                 </div>
               </div>
 
-              {/* YouTube Preview */}
               {youtubeId && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -187,9 +223,9 @@ export default function NewVideoPage() {
               <div className="space-y-4">
                 {thumbnailPreview ? (
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <img 
-                      src={thumbnailPreview} 
-                      alt="Thumbnail preview" 
+                    <img
+                      src={thumbnailPreview}
+                      alt="Thumbnail preview"
                       className="w-full h-full object-cover"
                     />
                     <Button
@@ -210,9 +246,9 @@ export default function NewVideoPage() {
                       <p className="text-sm font-medium text-foreground">Cliquez pour uploader</p>
                       <p className="text-xs text-muted-foreground mt-1">PNG, JPG jusqu&apos;a 5MB</p>
                     </div>
-                    <input 
-                      type="file" 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      className="hidden"
                       accept="image/*"
                       onChange={handleThumbnailChange}
                     />
@@ -240,11 +276,15 @@ export default function NewVideoPage() {
                   onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: checked })}
                 />
               </div>
-              
+
               <div className="pt-4 space-y-2">
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={handlePublish}
+                  disabled={isLoading || !formData.title || !formData.category}
+                >
                   <Save className="mr-2 h-4 w-4" />
-                  Publier
+                  {isLoading ? "Publication..." : "Publier"}
                 </Button>
                 <Button variant="outline" className="w-full border-border">
                   <Eye className="mr-2 h-4 w-4" />

@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
+import { formatDate, formatPlays, parseDurationToSeconds } from "@/lib/format"
 
 const categories = [
   "Toutes",
@@ -34,113 +35,29 @@ const categories = [
   "Prieres",
 ]
 
-const audioTracks = [
-  {
-    id: 1,
-    title: "La Grace Suffisante",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "45:32",
-    durationSec: 2732,
-    date: "22 Mars 2026",
-    category: "Predications",
-    plays: "1.2K",
-  },
-  {
-    id: 2,
-    title: "Vivre par l'Esprit",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "52:18",
-    durationSec: 3138,
-    date: "15 Mars 2026",
-    category: "Enseignements",
-    plays: "980",
-  },
-  {
-    id: 3,
-    title: "Le Combat de la Foi",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "48:45",
-    durationSec: 2925,
-    date: "8 Mars 2026",
-    category: "Predications",
-    plays: "1.5K",
-  },
-  {
-    id: 4,
-    title: "L'Amour Inconditionnel",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "55:10",
-    durationSec: 3310,
-    date: "1 Mars 2026",
-    category: "Enseignements",
-    plays: "2.1K",
-  },
-  {
-    id: 5,
-    title: "Louange et Adoration - Session 1",
-    speaker: "Chorale Plenitude",
-    duration: "1:15:22",
-    durationSec: 4522,
-    date: "25 Fevrier 2026",
-    category: "Louange",
-    plays: "3.4K",
-  },
-  {
-    id: 6,
-    title: "Priere du Matin",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "32:15",
-    durationSec: 1935,
-    date: "20 Fevrier 2026",
-    category: "Prieres",
-    plays: "890",
-  },
-  {
-    id: 7,
-    title: "La Puissance de la Resurrection",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "58:40",
-    durationSec: 3520,
-    date: "15 Fevrier 2026",
-    category: "Predications",
-    plays: "1.8K",
-  },
-  {
-    id: 8,
-    title: "Chants de Victoire",
-    speaker: "Chorale Plenitude",
-    duration: "45:00",
-    durationSec: 2700,
-    date: "10 Fevrier 2026",
-    category: "Louange",
-    plays: "2.7K",
-  },
-  {
-    id: 9,
-    title: "Les Promesses de Dieu",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "1:02:30",
-    durationSec: 3750,
-    date: "5 Fevrier 2026",
-    category: "Enseignements",
-    plays: "1.1K",
-  },
-  {
-    id: 10,
-    title: "Intercession pour les Nations",
-    speaker: "Equipe de Priere",
-    duration: "28:45",
-    durationSec: 1725,
-    date: "1 Fevrier 2026",
-    category: "Prieres",
-    plays: "650",
-  },
-]
+interface AudioTrack {
+  id: string
+  title: string
+  speaker: string
+  duration: string
+  durationSec: number
+  date: string
+  category: string
+  plays: string
+  fileUrl: string | null
+}
+
+const categoryMap: Record<string, string> = {
+  Predication: "Predications",
+  Enseignement: "Enseignements",
+  Louange: "Louange",
+  Priere: "Prieres",
+}
 
 export default function AudioPage() {
   const [selectedCategory, setSelectedCategory] = useState("Toutes")
   const [searchQuery, setSearchQuery] = useState("")
-  const [currentTrack, setCurrentTrack] = useState<typeof audioTracks[0] | null>(null)
+  const [currentTrack, setCurrentTrack] = useState<AudioTrack | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState(80)
@@ -148,13 +65,34 @@ export default function AudioPage() {
   const [isShuffled, setIsShuffled] = useState(false)
   const [isRepeating, setIsRepeating] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
-  
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([])
 
   const progressInterval = useRef<NodeJS.Timeout | null>(null)
 
+  useEffect(() => {
+    fetch("/api/audio?limit=50")
+      .then((r) => r.json())
+      .then((data) => {
+        const tracks: AudioTrack[] = (data.audios ?? []).map((a: any) => ({
+          id: a.id,
+          title: a.title,
+          speaker: a.speaker,
+          duration: a.duration ?? "0:00",
+          durationSec: parseDurationToSeconds(a.duration),
+          date: a.date,
+          category: categoryMap[a.category] ?? a.category,
+          plays: formatPlays(a.plays),
+          fileUrl: a.fileUrl,
+        }))
+        setAudioTracks(tracks)
+      })
+      .catch(console.error)
+  }, [])
+
   const filteredTracks = audioTracks.filter((track) => {
     const matchesCategory = selectedCategory === "Toutes" || track.category === selectedCategory
-    const matchesSearch = track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       track.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
@@ -162,10 +100,10 @@ export default function AudioPage() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  const playTrack = (track: typeof audioTracks[0]) => {
+  const playTrack = (track: AudioTrack) => {
     setCurrentTrack(track)
     setIsPlaying(true)
     setProgress(0)
@@ -175,12 +113,10 @@ export default function AudioPage() {
     setIsPlaying(!isPlaying)
   }
 
-  
-
   const playNext = () => {
     if (!currentTrack) return
-    const currentIndex = filteredTracks.findIndex(t => t.id === currentTrack.id)
-    const nextIndex = isShuffled 
+    const currentIndex = filteredTracks.findIndex((t) => t.id === currentTrack.id)
+    const nextIndex = isShuffled
       ? Math.floor(Math.random() * filteredTracks.length)
       : (currentIndex + 1) % filteredTracks.length
     playTrack(filteredTracks[nextIndex])
@@ -188,7 +124,7 @@ export default function AudioPage() {
 
   const playPrevious = () => {
     if (!currentTrack) return
-    const currentIndex = filteredTracks.findIndex(t => t.id === currentTrack.id)
+    const currentIndex = filteredTracks.findIndex((t) => t.id === currentTrack.id)
     const prevIndex = currentIndex === 0 ? filteredTracks.length - 1 : currentIndex - 1
     playTrack(filteredTracks[prevIndex])
   }
@@ -196,7 +132,7 @@ export default function AudioPage() {
   useEffect(() => {
     if (isPlaying && currentTrack) {
       progressInterval.current = setInterval(() => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev >= 100) {
             if (isRepeating) {
               return 0
@@ -205,7 +141,7 @@ export default function AudioPage() {
               return 0
             }
           }
-          return prev + (100 / currentTrack.durationSec)
+          return prev + (100 / (currentTrack.durationSec || 1))
         })
       }, 1000)
     } else {
@@ -364,7 +300,7 @@ export default function AudioPage() {
                     </span>
                     <span className="hidden sm:flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {track.date}
+                      {formatDate(track.date)}
                     </span>
                   </div>
                 </div>
@@ -478,7 +414,7 @@ export default function AudioPage() {
                 {/* Time & Volume */}
                 <div className="hidden lg:flex items-center gap-4 flex-1 justify-end">
                   <span className="text-sm text-muted-foreground w-20 text-right">
-                    {formatTime((progress / 100) * currentTrack.durationSec)} / {currentTrack.duration}
+                    {formatTime((progress / 100) * (currentTrack.durationSec || 1))} / {currentTrack.duration}
                   </span>
                   <div className="flex items-center gap-2 w-32">
                     <Button

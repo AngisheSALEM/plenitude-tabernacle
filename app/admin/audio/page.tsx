@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Headphones, 
@@ -34,83 +34,54 @@ import {
 } from "@/components/ui/select"
 import Link from "next/link"
 
-const audioTracks = [
-  {
-    id: 1,
-    title: "Marcher dans la foi",
-    description: "Comment developper une foi inébranlable",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-25",
-    plays: 856,
-    duration: "32:15",
-    category: "Predication",
-    isFeatured: true
-  },
-  {
-    id: 2,
-    title: "La priere efficace",
-    description: "Les cles d&apos;une vie de priere puissante",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-22",
-    plays: 1234,
-    duration: "28:45",
-    category: "Enseignement",
-    isFeatured: false
-  },
-  {
-    id: 3,
-    title: "Vivre par l&apos;Esprit",
-    description: "La vie dans l&apos;Esprit Saint",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-20",
-    plays: 678,
-    duration: "35:00",
-    category: "Predication",
-    isFeatured: false
-  },
-  {
-    id: 4,
-    title: "Les fruits de l&apos;Esprit",
-    description: "Manifester le caractere de Christ",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-18",
-    plays: 945,
-    duration: "41:30",
-    category: "Enseignement",
-    isFeatured: false
-  },
-  {
-    id: 5,
-    title: "La guerison divine",
-    description: "Comprendre la guerison par la foi",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-15",
-    plays: 1567,
-    duration: "38:20",
-    category: "Predication",
-    isFeatured: false
-  },
-  {
-    id: 6,
-    title: "Le combat spirituel",
-    description: "Les armes de notre combat",
-    speaker: "Pasteur Joel Mugisho",
-    date: "2026-03-12",
-    plays: 789,
-    duration: "45:00",
-    category: "Enseignement",
-    isFeatured: false
-  },
-]
+interface AdminAudio {
+  id: string
+  title: string
+  description: string | null
+  speaker: string
+  date: string
+  plays: number
+  duration: string | null
+  category: string
+  isFeatured: boolean
+}
 
 export default function AdminAudioPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
-  const [playingId, setPlayingId] = useState<number | null>(null)
+  const [playingId, setPlayingId] = useState<string | null>(null)
+  const [audioTracks, setAudioTracks] = useState<AdminAudio[]>([])
 
-  const filteredTracks = audioTracks.filter(track => {
-    const matchesSearch = track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         track.speaker.toLowerCase().includes(searchQuery.toLowerCase())
+  const fetchAudio = () => {
+    fetch("/api/audio?limit=100")
+      .then((r) => r.json())
+      .then((data) => setAudioTracks(data.audios ?? []))
+      .catch(console.error)
+  }
+
+  useEffect(() => {
+    fetchAudio()
+  }, [])
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cet audio ?")) return
+    await fetch(`/api/audio/${id}`, { method: "DELETE" })
+    fetchAudio()
+  }
+
+  const handleToggleFeatured = async (track: AdminAudio) => {
+    await fetch(`/api/audio/${track.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isFeatured: !track.isFeatured }),
+    })
+    fetchAudio()
+  }
+
+  const filteredTracks = audioTracks.filter((track) => {
+    const matchesSearch =
+      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      track.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = categoryFilter === "all" || track.category === categoryFilter
     return matchesSearch && matchesCategory
   })
@@ -221,20 +192,20 @@ export default function AdminAudioPage() {
                   </div>
                 </div>
 
-                {/* Category - Hidden on mobile */}
+                {/* Category */}
                 <div className="hidden sm:block col-span-2">
                   <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">
                     {track.category}
                   </span>
                 </div>
 
-                {/* Plays - Hidden on mobile */}
+                {/* Plays */}
                 <div className="hidden sm:flex col-span-2 items-center gap-1 text-sm text-muted-foreground">
                   <Play className="h-3 w-3" />
                   {track.plays}
                 </div>
 
-                {/* Duration - Hidden on mobile */}
+                {/* Duration */}
                 <div className="hidden sm:flex col-span-1 items-center gap-1 text-sm text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {track.duration}
@@ -253,12 +224,12 @@ export default function AdminAudioPage() {
                         <Edit className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleFeatured(track)}>
                         <Star className="mr-2 h-4 w-4" />
                         {track.isFeatured ? "Retirer de la une" : "Mettre a la une"}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(track.id)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Supprimer
                       </DropdownMenuItem>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Megaphone, 
@@ -35,70 +35,58 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
-const initialAnnouncements = [
-  {
-    id: 1,
-    title: "Culte special de Paques",
-    content: "Rejoignez-nous pour celebrer la resurrection de notre Seigneur Jesus-Christ. Service special a 9h00.",
-    isActive: true,
-    createdAt: "2026-03-25"
-  },
-  {
-    id: 2,
-    title: "Inscription aux cellules de maison",
-    content: "Les inscriptions pour les cellules de maison sont ouvertes. Contactez le secretariat pour plus d&apos;informations.",
-    isActive: true,
-    createdAt: "2026-03-20"
-  },
-  {
-    id: 3,
-    title: "Conference des jeunes",
-    content: "Grande conference des jeunes du 15 au 17 Avril. Theme: Bâtir sur le roc.",
-    isActive: false,
-    createdAt: "2026-03-15"
-  },
-  {
-    id: 4,
-    title: "Seminaire de formation",
-    content: "Formation des ouvriers le samedi 5 Avril de 8h a 12h. Presence obligatoire.",
-    isActive: true,
-    createdAt: "2026-03-10"
-  },
-]
+interface Announcement {
+  id: string
+  title: string
+  content: string
+  isActive: boolean
+  createdAt: string
+}
 
 export default function AdminAnnoncesPage() {
-  const [announcements, setAnnouncements] = useState(initialAnnouncements)
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "" })
 
-  const toggleActive = (id: number) => {
-    setAnnouncements(prev => 
-      prev.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a)
-    )
+  const fetchAnnouncements = () => {
+    fetch("/api/evenements?limit=100")
+      .then((r) => r.json())
+      .then((data) => setAnnouncements(data.evenements ?? []))
+      .catch(console.error)
   }
 
-  const handleCreate = () => {
-    if (newAnnouncement.title && newAnnouncement.content) {
-      setAnnouncements(prev => [
-        {
-          id: Date.now(),
-          title: newAnnouncement.title,
-          content: newAnnouncement.content,
-          isActive: true,
-          createdAt: new Date().toISOString().split('T')[0]
-        },
-        ...prev
-      ])
-      setNewAnnouncement({ title: "", content: "" })
-      setIsDialogOpen(false)
-    }
+  useEffect(() => {
+    fetchAnnouncements()
+  }, [])
+
+  const toggleActive = async (announcement: Announcement) => {
+    await fetch(`/api/evenements/${announcement.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: !announcement.isActive }),
+    })
+    fetchAnnouncements()
   }
 
-  const handleDelete = (id: number) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id))
+  const handleCreate = async () => {
+    if (!newAnnouncement.title || !newAnnouncement.content) return
+    await fetch("/api/evenements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newAnnouncement),
+    })
+    setNewAnnouncement({ title: "", content: "" })
+    setIsDialogOpen(false)
+    fetchAnnouncements()
   }
 
-  const activeCount = announcements.filter(a => a.isActive).length
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cette annonce ?")) return
+    await fetch(`/api/evenements/${id}`, { method: "DELETE" })
+    fetchAnnouncements()
+  }
+
+  const activeCount = announcements.filter((a) => a.isActive).length
 
   return (
     <div className="space-y-6">
@@ -152,7 +140,7 @@ export default function AdminAnnoncesPage() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Annuler
               </Button>
-              <Button 
+              <Button
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleCreate}
                 disabled={!newAnnouncement.title || !newAnnouncement.content}
@@ -222,8 +210,8 @@ export default function AdminAnnoncesPage() {
                 transition={{ duration: 0.2, delay: index * 0.05 }}
                 className="flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors"
               >
-                <div className={`p-2.5 rounded-lg shrink-0 ${announcement.isActive ? 'bg-green-500/10' : 'bg-muted'}`}>
-                  <Megaphone className={`h-5 w-5 ${announcement.isActive ? 'text-green-500' : 'text-muted-foreground'}`} />
+                <div className={`p-2.5 rounded-lg shrink-0 ${announcement.isActive ? "bg-green-500/10" : "bg-muted"}`}>
+                  <Megaphone className={`h-5 w-5 ${announcement.isActive ? "text-green-500" : "text-muted-foreground"}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -239,7 +227,7 @@ export default function AdminAnnoncesPage() {
                   </p>
                   <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
-                    <span>Cree le {new Date(announcement.createdAt).toLocaleDateString('fr-FR')}</span>
+                    <span>Cree le {new Date(announcement.createdAt).toLocaleDateString("fr-FR")}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -249,7 +237,7 @@ export default function AdminAnnoncesPage() {
                     </span>
                     <Switch
                       checked={announcement.isActive}
-                      onCheckedChange={() => toggleActive(announcement.id)}
+                      onCheckedChange={() => toggleActive(announcement)}
                     />
                   </div>
                   <DropdownMenu>
@@ -264,7 +252,7 @@ export default function AdminAnnoncesPage() {
                         Modifier
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => handleDelete(announcement.id)}
                       >
@@ -289,7 +277,7 @@ export default function AdminAnnoncesPage() {
             <p className="mt-2 text-muted-foreground">
               Creez votre premiere annonce pour informer la communaute.
             </p>
-            <Button 
+            <Button
               className="mt-4 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => setIsDialogOpen(true)}
             >
