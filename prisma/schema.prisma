@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MEMBRE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String    @unique
+  password      String?
+  phone         String?
+  address       String?
+  birthDate     DateTime?
+  bio           String?
+  avatar        String?
+  role          Role      @default(MEMBRE)
+  joinDate      DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  favoriteVideos    FavoriteVideo[]
+  favoriteAudios    FavoriteAudio[]
+  favoriteCantiques FavoriteCantique[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  speaker     String
+  date        DateTime @default(now())
+  views       Int      @default(0)
+  duration    String?
+  thumbnail   String?
+  youtubeUrl  String?
+  isFeatured  Boolean  @default(false)
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  favorites FavoriteVideo[]
+
+  @@map("videos")
+}
+
+model Audio {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  speaker     String
+  date        DateTime @default(now())
+  plays       Int      @default(0)
+  duration    String?
+  fileUrl     String?
+  category    String
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  favorites FavoriteAudio[]
+
+  @@map("audios")
+}
+
+model Cantique {
+  id        String   @id @default(cuid())
+  title     String
+  reference String
+  category  String
+  lyrics    Json
+  chorus    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites FavoriteCantique[]
+
+  @@map("cantiques")
+}
+
+model Evenement {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  isActive  Boolean   @default(true)
+  date      DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("evenements")
+}
+
+model FavoriteVideo {
+  id      String @id @default(cuid())
+  userId  String
+  videoId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@map("favorite_videos")
+}
+
+model FavoriteAudio {
+  id      String @id @default(cuid())
+  userId  String
+  audioId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audio Audio @relation(fields: [audioId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, audioId])
+  @@map("favorite_audios")
+}
+
+model FavoriteCantique {
+  id         String @id @default(cuid())
+  userId     String
+  cantiqueId String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cantique Cantique @relation(fields: [cantiqueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cantiqueId])
+  @@map("favorite_cantiques")
+}
