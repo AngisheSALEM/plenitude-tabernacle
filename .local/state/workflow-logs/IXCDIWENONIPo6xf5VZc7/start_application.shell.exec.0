@@ -1,0 +1,37 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+[32m[1m✓[22m[39m Ready in 478ms
+
+[37m[1m [22m[39m We detected TypeScript in your project and reconfigured your [36mtsconfig.json[39m file for you.
+[37m[1m [22m[39m The following suggested values were added to your [36mtsconfig.json[39m. These values [36mcan be changed[39m to fit your project's needs:
+
+[37m[1m [22m[39m 	- [36minclude[39m was updated to add [1m'.next/dev/types/**/*.ts'[22m
+
+
+[37m[1m○[22m[39m Compiling / ...
+ GET / [32m200[39m in 3.7s[2m (next.js: 3.4s, application-code: 297ms)[22m
+ GET /noise.png [33m404[39m in 445ms[2m (next.js: 400ms, application-code: 45ms)[22m
+[33m[1m⚠[22m[39m Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / [32m200[39m in 138ms[2m (next.js: 5ms, application-code: 133ms)[22m
+ GET /noise.png [33m404[39m in 57ms[2m (next.js: 4ms, application-code: 52ms)[22m
+[37m[1m [22m[39m Reload env: .env
+[37m[1m [22m[39m Reload env: .env
+ GET / [32m200[39m in 319ms[2m (next.js: 77ms, application-code: 242ms)[22m
+ GET /noise.png [33m404[39m in 62ms[2m (next.js: 16ms, application-code: 47ms)[22m
+[32m[1m✓[22m[39m Compiled in 61ms
+[32m[1m✓[22m[39m Compiled in 294ms

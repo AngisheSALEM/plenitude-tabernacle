@@ -1,0 +1,26 @@
+[1G[0K⠙[1G[0K
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K⠙[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 1653ms
+
+[37m[1m○[22m[39m Compiling / ...
+ GET / [32m200[39m in 20.3s[2m (next.js: 19.0s, application-code: 1260ms)[22m
+ GET /noise.png [33m404[39m in 631ms[2m (next.js: 513ms, application-code: 118ms)[22m
+ GET /api/auth/session [32m200[39m in 4.0s[2m (next.js: 3.8s, application-code: 209ms)[22m
+ GET / [32m200[39m in 387ms[2m (next.js: 95ms, application-code: 291ms)[22m
+ GET /noise.png [33m404[39m in 66ms[2m (next.js: 6ms, application-code: 60ms)[22m
+ GET /api/auth/session [32m200[39m in 90ms[2m (next.js: 76ms, application-code: 14ms)[22m
+ GET /api/auth/session [32m200[39m in 115ms[2m (next.js: 85ms, application-code: 29ms)[22m
+ GET /api/auth/session [32m200[39m in 82ms[2m (next.js: 56ms, application-code: 26ms)[22m
+[37m[1m○[22m[39m Compiling /admin ...
+ GET /admin [32m200[39m in 14.1s[2m (next.js: 13.9s, application-code: 161ms)[22m
+ GET /api/auth/session [32m200[39m in 113ms[2m (next.js: 84ms, application-code: 30ms)[22m
+ GET /admin/videos [32m200[39m in 2.2s[2m (next.js: 2.2s, application-code: 61ms)[22m
+ GET /api/videos?limit=100 [32m200[39m in 993ms[2m (next.js: 59ms, application-code: 934ms)[22m
+ GET /api/videos?limit=100 [32m200[39m in 15ms[2m (next.js: 4ms, application-code: 11ms)[22m
+ GET /admin/videos/nouveau [32m200[39m in 1622ms[2m (next.js: 1582ms, application-code: 41ms)[22m

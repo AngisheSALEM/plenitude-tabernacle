@@ -1,0 +1,42 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 350ms
+[33m[1m⚠[22m[39m The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[37m[1m○[22m[39m Compiling / ...
+ GET / [32m200[39m in 9.5s[2m (next.js: 9.0s, application-code: 530ms)[22m
+ GET / [32m200[39m in 9.5s[2m (next.js: 9.0s, application-code: 469ms)[22m
+ GET /noise.png [33m404[39m in 1764ms[2m (next.js: 1470ms, application-code: 294ms)[22m
+ GET /icon-192.png [33m404[39m in 105ms[2m (next.js: 16ms, application-code: 89ms)[22m
+ GET /api/auth/session [32m200[39m in 2.3s[2m (next.js: 2.2s, application-code: 34ms)[22m
+ GET /noise.png [33m404[39m in 118ms[2m (next.js: 54ms, application-code: 64ms)[22m
+ GET /api/auth/session [32m200[39m in 200ms[2m (next.js: 101ms, application-code: 99ms)[22m
+ GET / [32m200[39m in 107ms[2m (next.js: 4ms, application-code: 103ms)[22m
+ GET /noise.png [33m404[39m in 151ms[2m (next.js: 21ms, application-code: 129ms)[22m
+ GET /api/auth/session [32m200[39m in 89ms[2m (next.js: 76ms, application-code: 13ms)[22m
+ GET /connexion?callbackUrl=%2Fadmin [32m200[39m in 129ms[2m (next.js: 33ms, application-code: 96ms)[22m
+ GET /api/auth/session [32m200[39m in 167ms[2m (next.js: 90ms, application-code: 77ms)[22m
+ GET /connexion?callbackUrl=%2Fadmin [32m200[39m in 67ms[2m (next.js: 4ms, application-code: 63ms)[22m
+ GET /api/auth/session [32m200[39m in 134ms[2m (next.js: 110ms, application-code: 23ms)[22m
+ GET /api/auth/providers [32m200[39m in 75ms[2m (next.js: 65ms, application-code: 10ms)[22m
+ GET /api/auth/csrf [32m200[39m in 13ms[2m (next.js: 3ms, application-code: 9ms)[22m
+ POST /api/auth/callback/credentials [32m200[39m in 1272ms[2m (next.js: 81ms, application-code: 1191ms)[22m
+ GET /api/auth/session [32m200[39m in 84ms[2m (next.js: 68ms, application-code: 16ms)[22m
+ GET /connexion?callbackUrl=%2Fespace-membre [32m200[39m in 67ms[2m (next.js: 46ms, application-code: 21ms)[22m
+ GET /inscription [32m200[39m in 78ms[2m (next.js: 45ms, application-code: 33ms)[22m
+ POST /api/inscription [32m201[39m in 509ms[2m (next.js: 44ms, application-code: 465ms)[22m
+ GET /api/auth/providers [32m200[39m in 105ms[2m (next.js: 95ms, application-code: 10ms)[22m
+ GET /api/auth/csrf [32m200[39m in 30ms[2m (next.js: 5ms, application-code: 25ms)[22m
+ POST /api/auth/callback/credentials [32m200[39m in 469ms[2m (next.js: 84ms, application-code: 385ms)[22m
+ GET /api/auth/session [32m200[39m in 110ms[2m (next.js: 94ms, application-code: 16ms)[22m
+ GET /connexion?callbackUrl=%2Fespace-membre [32m200[39m in 23ms[2m (next.js: 2ms, application-code: 20ms)[22m
+ GET /inscription [32m200[39m in 74ms[2m (next.js: 2ms, application-code: 72ms)[22m
+ GET /connexion?callbackUrl=%2Fespace-membre [32m200[39m in 74ms[2m (next.js: 4ms, application-code: 70ms)[22m
+ GET /connexion?callbackUrl=%2Fadmin [32m200[39m in 46ms[2m (next.js: 3ms, application-code: 43ms)[22m
+ GET /api/auth/session [32m200[39m in 80ms[2m (next.js: 68ms, application-code: 12ms)[22m

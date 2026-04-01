@@ -1,0 +1,34 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 386ms
+
+[33m[1m⚠[22m[39m Slow filesystem detected. The benchmark took 640ms. If /home/runner/workspace/.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+ GET / [32m200[39m in 1054ms[2m (next.js: 727ms, application-code: 327ms)[22m
+ GET /noise.png [33m404[39m in 66ms[2m (next.js: 19ms, application-code: 47ms)[22m
+ GET / [32m200[39m in 80ms[2m (next.js: 3ms, application-code: 77ms)[22m
+ GET /noise.png [33m404[39m in 64ms[2m (next.js: 17ms, application-code: 47ms)[22m
+ GET /api/auth/session [32m200[39m in 2.6s[2m (next.js: 2.6s, application-code: 47ms)[22m
+ GET /api/videos [32m200[39m in 389ms[2m (next.js: 242ms, application-code: 147ms)[22m
+ GET /api/cantiques [32m200[39m in 253ms[2m (next.js: 244ms, application-code: 9ms)[22m
+ GET /api/evenements [32m200[39m in 199ms[2m (next.js: 190ms, application-code: 9ms)[22m
+ POST /api/inscription [32m201[39m in 532ms[2m (next.js: 133ms, application-code: 400ms)[22m
+[33m[1m⚠[22m[39m Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / [32m200[39m in 133ms[2m (next.js: 5ms, application-code: 128ms)[22m
+ GET /noise.png [33m404[39m in 44ms[2m (next.js: 5ms, application-code: 40ms)[22m

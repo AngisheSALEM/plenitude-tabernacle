@@ -1,0 +1,26 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 1358ms
+
+[37m[1m○[22m[39m Compiling / ...
+ GET / [32m200[39m in 5.4s[2m (next.js: 5.1s, application-code: 307ms)[22m
+ GET /noise.png [33m404[39m in 63ms[2m (next.js: 20ms, application-code: 44ms)[22m
+[33m[1m⚠[22m[39m Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / [32m200[39m in 95ms[2m (next.js: 4ms, application-code: 91ms)[22m
+ GET /noise.png [33m404[39m in 49ms[2m (next.js: 6ms, application-code: 43ms)[22m

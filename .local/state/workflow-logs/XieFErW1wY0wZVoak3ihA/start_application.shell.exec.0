@@ -1,0 +1,14 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 1137ms
+[33m[1m⚠[22m[39m Slow filesystem detected. The benchmark took 910ms. If /home/runner/workspace/.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+
+ GET /admin/videos/nouveau [32m200[39m in 1803ms[2m (next.js: 1397ms, application-code: 406ms)[22m
+ GET /api/auth/session [32m200[39m in 2.5s[2m (next.js: 2.5s, application-code: 50ms)[22m

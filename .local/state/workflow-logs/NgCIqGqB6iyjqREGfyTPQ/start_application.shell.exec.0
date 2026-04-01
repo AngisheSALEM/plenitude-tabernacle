@@ -1,0 +1,49 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.2.0[39m[22m (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+[32m[1m✓[22m[39m Ready in 494ms
+
+ GET / [32m200[39m in 3.6s[2m (next.js: 3.0s, application-code: 613ms)[22m
+ GET / [32m200[39m in 3.9s[2m (next.js: 3.4s, application-code: 552ms)[22m
+ GET /noise.png [33m404[39m in 74ms[2m (next.js: 21ms, application-code: 53ms)[22m
+ GET /noise.png [33m404[39m in 298ms[2m (next.js: 173ms, application-code: 126ms)[22m
+ GET /api/auth/session [32m200[39m in 1474ms[2m (next.js: 1432ms, application-code: 42ms)[22m
+ GET /api/auth/session [32m200[39m in 85ms[2m (next.js: 43ms, application-code: 42ms)[22m
+ GET / [32m200[39m in 130ms[2m (next.js: 8ms, application-code: 122ms)[22m
+ GET /noise.png [33m404[39m in 73ms[2m (next.js: 13ms, application-code: 61ms)[22m
+ GET /api/auth/session [32m200[39m in 78ms[2m (next.js: 54ms, application-code: 24ms)[22m
+[37m[1m○[22m[39m Compiling /connexion ...
+ GET /connexion [32m200[39m in 3.9s[2m (next.js: 3.9s, application-code: 35ms)[22m
+ GET /connexion [32m200[39m in 32ms[2m (next.js: 4ms, application-code: 28ms)[22m
+[37m[1m○[22m[39m Compiling /inscription ...
+ GET /inscription [32m200[39m in 4.3s[2m (next.js: 4.2s, application-code: 52ms)[22m
+ POST /api/inscription [32m201[39m in 1601ms[2m (next.js: 44ms, application-code: 1557ms)[22m
+ GET /api/auth/providers [32m200[39m in 78ms[2m (next.js: 63ms, application-code: 15ms)[22m
+ GET /api/auth/csrf [32m200[39m in 10ms[2m (next.js: 3ms, application-code: 7ms)[22m
+ POST /api/auth/callback/credentials [32m200[39m in 432ms[2m (next.js: 4ms, application-code: 428ms)[22m
+ GET /api/auth/session [32m200[39m in 89ms[2m (next.js: 69ms, application-code: 20ms)[22m
+ GET /espace-membre [32m200[39m in 2.7s[2m (next.js: 2.7s, application-code: 33ms)[22m
+ GET /profil [32m200[39m in 1778ms[2m (next.js: 1742ms, application-code: 36ms)[22m
+ GET /api/profil [32m200[39m in 943ms[2m (next.js: 772ms, application-code: 171ms)[22m
+ GET /api/profil [32m200[39m in 100ms[2m (next.js: 15ms, application-code: 85ms)[22m
+ GET /connexion [32m200[39m in 166ms[2m (next.js: 141ms, application-code: 25ms)[22m
+ GET /connexion [32m200[39m in 94ms[2m (next.js: 74ms, application-code: 20ms)[22m
+ GET /api/auth/providers [32m200[39m in 125ms[2m (next.js: 101ms, application-code: 24ms)[22m
+ GET /api/auth/csrf [32m200[39m in 13ms[2m (next.js: 2ms, application-code: 10ms)[22m
+ POST /api/auth/callback/credentials [33m401[39m in 40ms[2m (next.js: 3ms, application-code: 37ms)[22m
+ GET /api/auth/providers [32m200[39m in 92ms[2m (next.js: 77ms, application-code: 15ms)[22m
+ GET /api/auth/csrf [32m200[39m in 13ms[2m (next.js: 3ms, application-code: 9ms)[22m
+ POST /api/auth/callback/credentials [32m200[39m in 399ms[2m (next.js: 2ms, application-code: 396ms)[22m
+ GET /api/auth/session [32m200[39m in 112ms[2m (next.js: 75ms, application-code: 37ms)[22m
+ GET /espace-membre [32m200[39m in 30ms[2m (next.js: 3ms, application-code: 26ms)[22m
+ GET /profil [32m200[39m in 25ms[2m (next.js: 3ms, application-code: 22ms)[22m
+ GET /api/profil [32m200[39m in 58ms[2m (next.js: 1909µs, application-code: 56ms)[22m
+ GET /api/profil [32m200[39m in 46ms[2m (next.js: 3ms, application-code: 44ms)[22m
+ GET /connexion [32m200[39m in 144ms[2m (next.js: 123ms, application-code: 21ms)[22m
+ GET /connexion [32m200[39m in 27ms[2m (next.js: 3ms, application-code: 24ms)[22m
+[32m[1m✓[22m[39m Finished writing to filesystem cache in 11.6s
