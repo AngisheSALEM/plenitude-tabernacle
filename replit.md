@@ -10,6 +10,7 @@ Site web de l'église Plénitude Tabernacle de Kinshasa, développé en Next.js 
 - **ORM**: Prisma 7 (schéma dans `prisma/schema.prisma`, config dans `prisma.config.ts`)
 - **UI**: Tailwind CSS v4, Radix UI, shadcn/ui, Framer Motion
 - **Hachage**: bcryptjs
+- **PWA**: `@serwist/next` (Service Worker, cache offline), `dexie` (IndexedDB)
 
 ## Structure du projet
 

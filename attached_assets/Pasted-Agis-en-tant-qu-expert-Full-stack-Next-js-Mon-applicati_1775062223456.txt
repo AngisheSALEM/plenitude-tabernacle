@@ -1,0 +1,38 @@
+Agis en tant qu'expert Full-stack Next.js. Mon application utilise déjà NextAuth.js (Auth.js) avec l'adaptateur Prisma pour l'authentification. Je veux que tu transformes cette application en une PWA (Progressive Web App) professionnelle et 'Offline-First'.
+1. Authentification & Sécurité (NextAuth + Prisma)
+
+    Middleware : Optimise mon fichier middleware.ts pour qu'il utilise la stratégie JWT de NextAuth. Il doit vérifier l'authentification côté serveur avant de rendre les pages protégées (ex: /dashboard).
+
+    Persistance : Assure-toi que la session est stockée dans des Cookies HttpOnly sécurisés pour éviter les déconnexions au rafraîchissement.
+
+    Stabilité : Crée un hook useAuth qui gère proprement l'état de chargement (status === 'loading') pour éviter tout bug d'affichage (flickering).
+
+2. Configuration PWA (Installable & Téléchargeable)
+
+    Service Worker : Utilise @serwist/next (ou next-pwa) pour configurer le Service Worker. Il doit mettre en cache les assets statiques (JS, CSS, polices) et les pages principales pour que l'app s'ouvre sans connexion.
+
+    Manifest : Génère un fichier public/manifest.json complet (nom, short_name, theme_color, background_color, display: 'standalone').
+
+    Meta Tags : Ajoute dans le layout.tsx les balises meta nécessaires pour iOS (apple-mobile-web-app-capable) et Android.
+
+3. Stratégie de Données Offline (IndexedDB)
+
+    Synchronisation : Installe et configure Dexie.js (wrapper IndexedDB). Crée une logique qui synchronise les données essentielles de l'utilisateur (actuellement dans Prisma) vers la base locale IndexedDB dès que l'utilisateur est 'Online'.
+
+    Fallback Offline : Modifie mes composants de récupération de données pour qu'ils lisent dans IndexedDB si window.navigator.onLine est faux ou si l'API est injoignable.
+
+    Gestion JSON : Optimise le stockage pour permettre la recherche rapide dans mes fichiers de données (environ 1 200 entrées JSON) même sans réseau.
+
+4. Interface Utilisateur (UX)
+
+    Ajoute un composant discret NetworkStatus qui affiche un message ('Mode Hors ligne actif') quand la connexion est perdue.
+
+    Crée un bouton 'Installer l'application' qui apparaît uniquement si la PWA n'est pas encore installée (en interceptant l'événement beforeinstallprompt).
+
+Livrables :
+
+    Mise à jour de next.config.mjs, middleware.ts, et layout.tsx.
+
+    Création de public/manifest.json et de la configuration du Service Worker.
+
+    Un fichier lib/dexie.ts pour la structure de la base de données locale."
