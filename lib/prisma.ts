@@ -10,7 +10,12 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-  const pool = globalForPrisma.pool ?? new Pool({ connectionString: process.env.DATABASE_URL })
+  let connectionString = process.env.DATABASE_URL
+  if (connectionString && !connectionString.includes("sslmode=")) {
+    connectionString += connectionString.includes("?") ? "&sslmode=verify-full" : "?sslmode=verify-full"
+  }
+
+  const pool = globalForPrisma.pool ?? new Pool({ connectionString })
   if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool
 
   const adapter = new PrismaPg(pool)
