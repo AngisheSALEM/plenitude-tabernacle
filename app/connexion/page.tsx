@@ -35,7 +35,7 @@ export default function ConnexionPage() {
     })
     setIsLoading(false)
     if (result?.ok) {
-      router.push("/espace-membre")
+      window.location.href = "/espace-membre"
     } else {
       setError("Email ou mot de passe incorrect")
     }

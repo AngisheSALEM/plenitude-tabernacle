@@ -48,13 +48,17 @@ export default function InscriptionPage() {
       setError(data.error || "Erreur lors de la creation du compte")
       return
     }
-    await signIn("credentials", {
+    const result = await signIn("credentials", {
       email: formData.email,
       password: formData.password,
       redirect: false,
     })
     setIsLoading(false)
-    router.push("/espace-membre")
+    if (result?.ok) {
+      window.location.href = "/espace-membre"
+    } else {
+      setError("Erreur lors de la connexion automatique")
+    }
   }
 
   const handleGoogleLogin = async () => {
