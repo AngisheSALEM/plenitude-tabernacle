@@ -91,7 +91,11 @@ export default function ProfilPage() {
   useEffect(() => {
     fetch("/api/profil")
       .then((r) => {
-        if (!r.ok) throw new Error("Non autorise")
+        if (!r.ok) {
+          const error = new Error(r.status === 401 ? "Non autorise" : "Erreur serveur")
+          ;(error as any).status = r.status
+          throw error
+        }
         return r.json()
       })
       .then((data) => {
@@ -142,8 +146,11 @@ export default function ProfilPage() {
           bio: profile.bio,
         })
       })
-      .catch(() => {
-        router.push("/connexion")
+      .catch((err) => {
+        console.error("Erreur lors du chargement du profil:", err)
+        if (err.message === "Non autorise" || err.status === 401) {
+          router.push("/connexion")
+        }
       })
   }, [])
 

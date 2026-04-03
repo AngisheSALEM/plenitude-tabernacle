@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    return NextResponse.json({ user })
   } catch (error) {
     console.error("[PROFIL GET]", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
