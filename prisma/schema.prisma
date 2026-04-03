@@ -86,7 +86,7 @@ model Video {
   views       Int      @default(0)
   duration    String?
   thumbnail   String?
-  youtubeUrl  String?
+  youtubeUrl  String?  @unique
   isFeatured  Boolean  @default(false)
   category    String
   createdAt   DateTime @default(now())
