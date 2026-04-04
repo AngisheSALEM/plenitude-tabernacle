@@ -2,41 +2,29 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { Play, Clock, User, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const videos = [
-  {
-    id: 1,
-    title: "La Puissance de la Résurrection",
-    speaker: "Pasteur Joel Mugisho",
-    date: "24 Mars 2026",
-    duration: "1h 15min",
-    thumbnail: null,
-  },
-  {
-    id: 2,
-    title: "Marcher dans la Foi",
-    speaker: "Pasteur Joel Mugisho",
-    date: "17 Mars 2026",
-    duration: "58min",
-    thumbnail: null,
-  },
-  {
-    id: 3,
-    title: "Les Promesses de Dieu",
-    speaker: "Pasteur Joel Mugisho",
-    date: "10 Mars 2026",
-    duration: "1h 05min",
-    thumbnail: null,
-  },
-]
+import { formatDate } from "@/lib/format"
 
 export function VideosSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [videos, setVideos] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/videos?limit=3")
+      .then(res => res.json())
+      .then(data => {
+        if (data.videos && data.videos.length > 0) {
+          setVideos(data.videos)
+        }
+      })
+      .catch(err => console.error("Error fetching landing videos:", err))
+      .finally(() => setIsLoading(false))
+  }, [])
 
   return (
     <section id="videos" className="relative py-32 overflow-hidden" ref={ref}>
@@ -72,7 +60,12 @@ export function VideosSection() {
 
         {/* Videos Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {videos.map((video, index) => (
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="aspect-video rounded-2xl bg-card animate-pulse border border-border/50" />
+            ))
+          ) : videos.length > 0 ? (
+            videos.map((video, index) => (
             <motion.article
               key={video.id}
               initial={{ opacity: 0, y: 30 }}
@@ -120,7 +113,12 @@ export function VideosSection() {
                 </div>
               </div>
             </motion.article>
-          ))}
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            Aucune vidéo disponible pour le moment.
+          </div>
+        )}
         </div>
       </div>
     </section>

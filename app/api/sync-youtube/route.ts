@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
         const publishedAt = snippet.publishedAt;
 
         // On utilise prisma.video.upsert car youtubeUrl est maintenant @unique
+        console.log(`[SYNC-YOUTUBE] Traitement de la vidéo: ${title} (${videoId})`);
         const video = await prisma.video.upsert({
           where: { youtubeUrl },
           update: {
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
             thumbnail,
             date: new Date(publishedAt),
             speaker: "Pasteur", // Valeur par défaut
-            category: "Prédication", // Valeur par défaut
+            category: "Predication", // Valeur par défaut (sans accent pour match UI)
             isFeatured: false,
           }
         });
