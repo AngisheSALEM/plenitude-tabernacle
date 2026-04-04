@@ -2,46 +2,34 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import { Play, Pause, Headphones, Clock, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const audioTracks = [
-  {
-    id: 1,
-    title: "La Grâce Suffisante",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "45:32",
-    date: "22 Mars 2026",
-  },
-  {
-    id: 2,
-    title: "Vivre par l'Esprit",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "52:18",
-    date: "15 Mars 2026",
-  },
-  {
-    id: 3,
-    title: "Le Combat de la Foi",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "48:45",
-    date: "8 Mars 2026",
-  },
-  {
-    id: 4,
-    title: "L'Amour Inconditionnel",
-    speaker: "Pasteur Joel Mugisho",
-    duration: "55:10",
-    date: "1 Mars 2026",
-  },
-]
-
 export function AudioSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [playingId, setPlayingId] = useState<number | null>(null)
+  const [playingId, setPlayingId] = useState<string | null>(null)
+  const [audioTracks, setAudioTracks] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({ count: 0, duration: "0h" })
+
+  useEffect(() => {
+    fetch("/api/audio?limit=4")
+      .then(res => res.json())
+      .then(data => {
+        if (data.audios) {
+          setAudioTracks(data.audios)
+          setStats({
+            count: data.pagination.total || 0,
+            duration: `${Math.round((data.pagination.total * 45) / 60)}h+` // Rough estimate
+          })
+        }
+      })
+      .catch(err => console.error("Error fetching landing audio:", err))
+      .finally(() => setIsLoading(false))
+  }, [])
 
   return (
     <section id="audio" className="relative py-32 overflow-hidden" ref={ref}>
@@ -77,14 +65,14 @@ export function AudioSection() {
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20">
                 <Headphones className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">200+</p>
+                  <p className="font-semibold text-foreground">{isLoading ? "..." : stats.count > 0 ? `${stats.count}+` : "0"}</p>
                   <p className="text-xs text-muted-foreground">Prédications</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20">
                 <Clock className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">150h+</p>
+                  <p className="font-semibold text-foreground">{isLoading ? "..." : stats.duration}</p>
                   <p className="text-xs text-muted-foreground">De contenu</p>
                 </div>
               </div>
@@ -139,7 +127,12 @@ export function AudioSection() {
 
               {/* Track list */}
               <div className="space-y-2">
-                {audioTracks.map((track, index) => (
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-16 rounded-xl bg-muted/20 animate-pulse" />
+                  ))
+                ) : audioTracks.length > 0 ? (
+                  audioTracks.map((track, index) => (
                   <motion.div
                     key={track.id}
                     initial={{ opacity: 0, x: 20 }}
@@ -169,7 +162,12 @@ export function AudioSection() {
                     </div>
                     <span className="text-sm text-muted-foreground">{track.duration}</span>
                   </motion.div>
-                ))}
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Aucun audio disponible pour le moment.
+                </div>
+              )}
               </div>
             </div>
 

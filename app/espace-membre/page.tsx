@@ -23,33 +23,36 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { HymnBook } from "@/components/cantiques/hymn-book"
 
-// Mock data for videos
-const allVideos = [
-  { id: 1, title: "La puissance de la foi", speaker: "Pasteur Joel Mugisho", date: "2024-03-15", duration: "1:45:00", views: 2340, category: "Predication", thumbnail: "/placeholder.svg", downloaded: false },
-  { id: 2, title: "Marcher dans l'amour divin", speaker: "Pasteur Joel Mugisho", date: "2024-03-10", duration: "1:30:00", views: 1890, category: "Enseignement", thumbnail: "/placeholder.svg", downloaded: true },
-  { id: 3, title: "La priere efficace", speaker: "Pasteur Joel Mugisho", date: "2024-03-05", duration: "2:00:00", views: 3200, category: "Predication", thumbnail: "/placeholder.svg", downloaded: false },
-  { id: 4, title: "Vaincre le decouragement", speaker: "Pasteur Joel Mugisho", date: "2024-02-28", duration: "1:15:00", views: 1560, category: "Enseignement", thumbnail: "/placeholder.svg", downloaded: true },
-  { id: 5, title: "Les promesses de Dieu", speaker: "Pasteur Joel Mugisho", date: "2024-02-20", duration: "1:50:00", views: 2100, category: "Predication", thumbnail: "/placeholder.svg", downloaded: false },
-  { id: 6, title: "La guerison divine", speaker: "Pasteur Joel Mugisho", date: "2024-02-15", duration: "1:40:00", views: 2800, category: "Predication", thumbnail: "/placeholder.svg", downloaded: false },
-  { id: 7, title: "Vivre par la foi", speaker: "Pasteur Joel Mugisho", date: "2024-02-10", duration: "1:35:00", views: 1750, category: "Enseignement", thumbnail: "/placeholder.svg", downloaded: true },
-  { id: 8, title: "Le renouvellement de l'intelligence", speaker: "Pasteur Joel Mugisho", date: "2024-02-05", duration: "1:55:00", views: 2450, category: "Predication", thumbnail: "/placeholder.svg", downloaded: false },
-]
-
-// Mock data for audio
-const allAudio = [
-  { id: 1, title: "Meditations du matin - Psaume 23", speaker: "Pasteur Joel Mugisho", date: "2024-03-18", duration: "25:00", plays: 5600, category: "Meditation", downloaded: false },
-  { id: 2, title: "La sagesse de Dieu", speaker: "Pasteur Joel Mugisho", date: "2024-03-12", duration: "45:00", plays: 3200, category: "Enseignement", downloaded: true },
-  { id: 3, title: "Prieres du soir", speaker: "Pasteur Joel Mugisho", date: "2024-03-08", duration: "30:00", plays: 4100, category: "Priere", downloaded: false },
-  { id: 4, title: "Le Saint-Esprit en nous", speaker: "Pasteur Joel Mugisho", date: "2024-03-01", duration: "55:00", plays: 2800, category: "Enseignement", downloaded: true },
-  { id: 5, title: "Louange et adoration - Session 1", speaker: "Chorale Plenitude", date: "2024-02-25", duration: "1:10:00", plays: 6500, category: "Louange", downloaded: false },
-  { id: 6, title: "La paix qui surpasse", speaker: "Pasteur Joel Mugisho", date: "2024-02-20", duration: "40:00", plays: 2100, category: "Meditation", downloaded: true },
-  { id: 7, title: "Etude biblique - Romains 8", speaker: "Pasteur Joel Mugisho", date: "2024-02-15", duration: "1:00:00", plays: 3400, category: "Enseignement", downloaded: false },
-  { id: 8, title: "Chants de victoire", speaker: "Chorale Plenitude", date: "2024-02-10", duration: "50:00", plays: 4800, category: "Louange", downloaded: false },
-]
-
 export default function EspaceMembrePage() {
+  const [allVideos, setAllVideos] = useState<any[]>([])
+  const [allAudio, setAllAudio] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const [videosRes, audioRes] = await Promise.all([
+          fetch("/api/videos?limit=100"),
+          fetch("/api/audio?limit=100")
+        ])
+
+        const videosData = await videosRes.json()
+        const audioData = await audioRes.json()
+
+        setAllVideos(videosData.videos || [])
+        setAllAudio(audioData.audios || [])
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<"date" | "views" | "title">("date")
   const [showDownloaded, setShowDownloaded] = useState(false)
@@ -81,7 +84,7 @@ export default function EspaceMembrePage() {
   const downloadedVideos = allVideos.filter(v => v.downloaded)
   const downloadedAudio = allAudio.filter(a => a.downloaded)
 
-  const handleDownload = async (type: string, id: number) => {
+  const handleDownload = async (type: string, id: string) => {
     const key = `${type}-${id}`
     setDownloadingItems(prev => new Set(prev).add(key))
     await new Promise(resolve => setTimeout(resolve, 2000))
@@ -263,6 +266,12 @@ export default function EspaceMembrePage() {
 
           {/* Videos Tab */}
           <TabsContent value="videos" className="space-y-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground">
                 {filteredVideos.length} predication{filteredVideos.length > 1 ? "s" : ""} disponible{filteredVideos.length > 1 ? "s" : ""}
@@ -396,10 +405,18 @@ export default function EspaceMembrePage() {
                 ))}
               </div>
             )}
+            </>
+            )}
           </TabsContent>
 
           {/* Audio Tab */}
           <TabsContent value="audio" className="space-y-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground">
                 {filteredAudio.length} piste{filteredAudio.length > 1 ? "s" : ""} audio disponible{filteredAudio.length > 1 ? "s" : ""}
@@ -474,6 +491,8 @@ export default function EspaceMembrePage() {
                 </motion.div>
               ))}
             </div>
+            </>
+            )}
           </TabsContent>
 
           {/* Cantiques Tab */}
