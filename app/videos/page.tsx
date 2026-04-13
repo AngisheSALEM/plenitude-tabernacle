@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
 import { formatDate } from "@/lib/format"
+import { extractYoutubeId } from "@/lib/youtube"
 
 const categories = [
   "Toutes",
@@ -26,14 +27,19 @@ interface Video {
   duration: string | null
   category: string
   description: string | null
+  thumbnail: string | null
+  youtubeUrl: string | null
 }
 
 const categoryMap: Record<string, string> = {
-  Predication: "Predications",
-  Enseignement: "Enseignements",
-  Louange: "Louange",
-  Temoignage: "Temoignages",
-  Conference: "Conferences",
+  "Predication": "Predications",
+  "Prédication": "Predications",
+  "Enseignement": "Enseignements",
+  "Louange": "Louange",
+  "Temoignage": "Temoignages",
+  "Témoignage": "Temoignages",
+  "Conference": "Conferences",
+  "Conférence": "Conferences",
 }
 
 export default function VideosPage() {
@@ -168,7 +174,15 @@ export default function VideosPage() {
                 >
                   {/* Thumbnail */}
                   <div className="relative aspect-video rounded-2xl overflow-hidden bg-card border border-border/50 mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    )}
                     
                     {/* Category badge */}
                     <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary/90 text-xs font-medium text-primary-foreground">
@@ -227,7 +241,15 @@ export default function VideosPage() {
                 >
                   {/* Thumbnail */}
                   <div className="relative w-48 aspect-video rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    )}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="p-3 rounded-full bg-primary/90">
                         <Play className="h-5 w-5 text-primary-foreground fill-current" />
@@ -295,17 +317,21 @@ export default function VideosPage() {
               <X className="h-5 w-5" />
             </Button>
 
-            {/* Video Player Placeholder */}
+            {/* Video Player */}
             <div className="relative aspect-video bg-muted">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-6 rounded-full bg-primary/90"
-                >
-                  <Play className="h-12 w-12 text-primary-foreground fill-current" />
-                </motion.button>
-              </div>
+              {selectedVideo.youtubeUrl ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(selectedVideo.youtubeUrl)}?autoplay=1`}
+                  title={selectedVideo.title}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                  <p className="text-primary-foreground">Vidéo non disponible</p>
+                </div>
+              )}
             </div>
 
             {/* Video Info */}

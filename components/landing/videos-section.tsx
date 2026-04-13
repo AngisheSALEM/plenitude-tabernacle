@@ -75,7 +75,15 @@ export function VideosSection() {
             >
               {/* Thumbnail */}
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-card border border-border/50 mb-4">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                {video.thumbnail ? (
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                )}
                 
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -108,7 +116,7 @@ export function VideosSection() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    {video.date}
+                    {formatDate(video.date)}
                   </span>
                 </div>
               </div>
