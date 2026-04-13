@@ -47,6 +47,7 @@ export default function VideosPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
   const [videos, setVideos] = useState<Video[]>([])
 
   useEffect(() => {
@@ -64,6 +65,22 @@ export default function VideosPage() {
       video.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
+
+  const goToNextVideo = () => {
+    if (selectedIndex < filteredVideos.length - 1) {
+      const nextIndex = selectedIndex + 1
+      setSelectedIndex(nextIndex)
+      setSelectedVideo(filteredVideos[nextIndex])
+    }
+  }
+
+  const goToPrevVideo = () => {
+    if (selectedIndex > 0) {
+      const prevIndex = selectedIndex - 1
+      setSelectedIndex(prevIndex)
+      setSelectedVideo(filteredVideos[prevIndex])
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -169,7 +186,10 @@ export default function VideosPage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedVideo(video)}
+                  onClick={() => {
+                    setSelectedVideo(video)
+                    setSelectedIndex(index)
+                  }}
                   className="group cursor-pointer"
                 >
                   {/* Thumbnail */}
@@ -236,7 +256,10 @@ export default function VideosPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedVideo(video)}
+                  onClick={() => {
+                    setSelectedVideo(video)
+                    setSelectedIndex(index)
+                  }}
                   className="group flex gap-6 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer"
                 >
                   {/* Thumbnail */}
@@ -300,25 +323,31 @@ export default function VideosPage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-xl"
-          onClick={() => setSelectedVideo(null)}
+          onClick={() => {
+            setSelectedVideo(null)
+            setSelectedIndex(-1)
+          }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-5xl bg-card rounded-3xl overflow-hidden border border-border"
+            className="relative w-full max-w-5xl bg-card rounded-3xl overflow-hidden border border-border flex flex-col md:flex-row"
             onClick={(e) => e.stopPropagation()}
           >
             <Button
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 rounded-full bg-background/50 backdrop-blur-sm"
-              onClick={() => setSelectedVideo(null)}
+              onClick={() => {
+                setSelectedVideo(null)
+                setSelectedIndex(-1)
+              }}
             >
               <X className="h-5 w-5" />
             </Button>
 
             {/* Video Player */}
-            <div className="relative aspect-video bg-muted">
+            <div className="relative aspect-video bg-muted flex-1">
               {selectedVideo.youtubeUrl ? (
                 <iframe
                   src={`https://www.youtube.com/embed/${extractYoutubeId(selectedVideo.youtubeUrl)}?autoplay=1`}
@@ -332,6 +361,30 @@ export default function VideosPage() {
                   <p className="text-primary-foreground">Vidéo non disponible</p>
                 </div>
               )}
+
+              {/* Navigation Controls */}
+              <div className="absolute inset-y-0 left-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={goToPrevVideo}
+                  disabled={selectedIndex <= 0}
+                >
+                  <ChevronLeft className="h-10 w-10" />
+                </Button>
+              </div>
+              <div className="absolute inset-y-0 right-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={goToNextVideo}
+                  disabled={selectedIndex >= filteredVideos.length - 1}
+                >
+                  <ChevronRight className="h-10 w-10" />
+                </Button>
+              </div>
             </div>
 
             {/* Video Info */}

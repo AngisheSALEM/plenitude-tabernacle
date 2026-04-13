@@ -27,7 +27,9 @@ export async function GET() {
       activeSession: {
         id: activeSession.id,
         sermonTitle: activeSession.sermon.title,
-        activeSlide
+        activeSlideId: activeSession.activeSlideId,
+        activeSlide,
+        slides: activeSession.sermon.slides.sort((a, b) => a.order - b.order)
       }
     });
   } catch (error) {
