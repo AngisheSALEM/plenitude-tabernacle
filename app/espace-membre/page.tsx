@@ -7,7 +7,8 @@ import {
   Play, Pause, Download, Headphones, Video, MapPin, 
   Calendar, Clock, Search, Filter, Grid, List,
   Heart, Share2, CheckCircle, ArrowRight, User,
-  ChevronDown, X, LogOut, Settings, Bell, Book, Music
+  ChevronDown, X, LogOut, Settings, Bell, Book, Music,
+  Tv, Smartphone
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -120,6 +121,12 @@ export default function EspaceMembrePage() {
             </Link>
 
             <div className="flex items-center gap-3">
+              <Link href="/parametres?tab=preferences">
+                <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2 border-primary/30 text-primary">
+                  <Smartphone className="h-4 w-4" />
+                  Installer l'App
+                </Button>
+              </Link>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
@@ -198,6 +205,14 @@ export default function EspaceMembrePage() {
               <TabsTrigger value="downloads" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Download className="mr-2 h-4 w-4" />
                 Telecharges
+              </TabsTrigger>
+              <TabsTrigger value="live" className="rounded-full px-6 data-[state=active]:bg-red-600 data-[state=active]:text-white relative">
+                <Tv className="mr-2 h-4 w-4" />
+                Live
+                <span className="absolute top-1 right-2 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
               </TabsTrigger>
                 <TabsTrigger value="location" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <MapPin className="mr-2 h-4 w-4" />
@@ -611,6 +626,26 @@ export default function EspaceMembrePage() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Live Tab */}
+          <TabsContent value="live" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-card border border-border rounded-3xl p-8 text-center"
+            >
+              <h2 className="text-2xl font-bold mb-4">Rejoindre le Direct</h2>
+              <p className="text-muted-foreground mb-8">
+                Suivez les citations et les versets bibliques lus en temps réel pendant le culte.
+              </p>
+              <Button size="lg" className="bg-red-600 hover:bg-red-700" asChild>
+                <Link href="/espace-membre/live">
+                    <Tv className="mr-2 h-5 w-5" />
+                    Ouvrir l'Espace Live
+                </Link>
+              </Button>
+            </motion.div>
           </TabsContent>
 
           {/* Location Tab */}

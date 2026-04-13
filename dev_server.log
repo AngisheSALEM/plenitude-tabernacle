@@ -1,0 +1,25 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+✓ Ready in 593ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[next-auth][error][NO_SECRET]
+https://next-auth.js.org/errors#no_secret
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/error?error=Configuration 302 in 2.7s (next.js: 2.7s, application-code: 55ms)
+○ Compiling /connexion ...
+ GET /connexion?error=Configuration 200 in 9.8s (next.js: 8.7s, proxy.ts: 12ms, application-code: 1095ms)
+ GET /api/auth/session 200 in 204ms (next.js: 164ms, application-code: 40ms)
+ GET /predicateur 200 in 2.4s (next.js: 2.2s, application-code: 182ms)
+ GET /api/auth/session 200 in 64ms (next.js: 51ms, application-code: 13ms)
+ GET /predicateur/editeur 200 in 1739ms (next.js: 1613ms, application-code: 125ms)
+ POST /api/slides/generate 200 in 423ms (next.js: 408ms, application-code: 15ms)
+ GET /predicateur/live/preview 404 in 2.4s (next.js: 2.3s, application-code: 92ms)
