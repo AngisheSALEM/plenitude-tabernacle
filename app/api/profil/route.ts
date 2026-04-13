@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json()
     const { firstName, lastName, phone, address, birthDate, bio, avatar } = body
 
-    if (body.email) {
+    if (body.email && body.email !== session.user.email) {
       return NextResponse.json(
         { error: "La modification de l'email n'est pas autorisée ici" },
         { status: 400 }
