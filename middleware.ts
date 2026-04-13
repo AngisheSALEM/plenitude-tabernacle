@@ -7,7 +7,7 @@ export default withAuth(
     const token = req.nextauth.token
 
     if (token) {
-      if (pathname === "/connexion" || pathname === "/inscription") {
+      if (pathname === "/" || pathname === "/connexion" || pathname === "/inscription") {
         return NextResponse.redirect(new URL("/espace-membre", req.url))
       }
       if (pathname.startsWith("/admin") && token?.role !== "ADMIN") {
@@ -21,7 +21,7 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
-        if (pathname === "/connexion" || pathname === "/inscription") return true
+        if (pathname === "/" || pathname === "/connexion" || pathname === "/inscription") return true
         if (pathname.startsWith("/admin")) return !!token
         if (pathname.startsWith("/espace-membre")) return !!token
         if (pathname.startsWith("/profil")) return !!token
@@ -38,6 +38,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
+    "/",
     "/espace-membre/:path*",
     "/profil/:path*",
     "/admin/:path*",
