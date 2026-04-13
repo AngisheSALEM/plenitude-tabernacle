@@ -181,8 +181,9 @@ export default function EspaceMembrePage() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="bg-secondary p-1 rounded-full w-fit">
-              <TabsTrigger value="videos" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <div className="w-full lg:w-auto overflow-x-auto pb-2 scrollbar-hide">
+              <TabsList className="bg-secondary p-1 rounded-full w-fit">
+                <TabsTrigger value="videos" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Video className="mr-2 h-4 w-4" />
                 Videos
               </TabsTrigger>
@@ -198,16 +199,17 @@ export default function EspaceMembrePage() {
                 <Download className="mr-2 h-4 w-4" />
                 Telecharges
               </TabsTrigger>
-              <TabsTrigger value="location" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <MapPin className="mr-2 h-4 w-4" />
-                Localisation
-              </TabsTrigger>
-            </TabsList>
+                <TabsTrigger value="location" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Localisation
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* Search & Filters */}
             {(activeTab === "videos" || activeTab === "audio") && (
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1 lg:w-64">
+              <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                <div className="relative w-full sm:flex-1 lg:w-64 lg:flex-none">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Rechercher..."

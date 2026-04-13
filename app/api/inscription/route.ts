@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const nameParts = name.trim().split(" ")
     const firstName = nameParts[0]
-    const lastName = nameParts.slice(1).join(" ") || "."
+    const lastName = nameParts.slice(1).join(" ") || ""
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
