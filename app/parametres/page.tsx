@@ -7,9 +7,10 @@ import {
   ArrowLeft, Bell, Lock, Palette, 
   Smartphone, Eye, EyeOff, Save, User, Mail,
   Download, Trash2, HelpCircle, MessageSquare, FileText,
-  ChevronRight, Check
+  ChevronRight, Check, AppWindow
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { usePwa } from "@/components/pwa-provider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/accordion"
 
 export default function ParametresPage() {
+  const { isInstallable, isStandalone, installApp } = usePwa()
   const [settings, setSettings] = useState({
     // Notifications
     emailNotifications: true,
@@ -264,6 +266,39 @@ export default function ParametresPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* PWA Installation */}
+                {!isStandalone && (
+                  <div className="bg-card border border-border rounded-2xl p-6">
+                    <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+                      <Smartphone className="h-5 w-5 text-primary" />
+                      Application
+                    </h2>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                        <div className="flex-1 mr-4">
+                          <p className="font-medium text-foreground">Obtenez l&apos;app</p>
+                          <p className="text-sm text-muted-foreground">
+                            Installez Plénitude sur votre écran d&apos;accueil pour un accès rapide et hors ligne.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={installApp}
+                          disabled={!isInstallable}
+                          className="shrink-0"
+                        >
+                          <AppWindow className="mr-2 h-4 w-4" />
+                          Installer
+                        </Button>
+                      </div>
+                      {!isInstallable && (
+                        <p className="text-xs text-muted-foreground italic px-2">
+                          * Si le bouton est désactivé, l&apos;application est déjà installée ou votre navigateur ne supporte pas l&apos;installation directe.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-end">
                   <Button onClick={() => handleSave("preferences")}>

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, LogIn } from "lucide-react"
+import { Menu, X, LogIn, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -17,6 +18,7 @@ const navLinks = [
 ]
 
 export function Navbar() {
+  const { data: session, status } = useSession()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -71,15 +73,27 @@ export function Navbar() {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-3">
               <ThemeToggle />
-              <Link href="/connexion">
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Connexion
-                </Button>
-              </Link>
+              {status === "authenticated" ? (
+                <Link href="/espace-membre">
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Espace Membre
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/connexion">
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Connexion
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -144,12 +158,21 @@ export function Navbar() {
                 transition={{ delay: 0.4 }}
                 className="space-y-3"
               >
-                <Link href="/connexion" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
-                    <LogIn className="mr-2 h-5 w-5" />
-                    Se Connecter
-                  </Button>
-                </Link>
+                {status === "authenticated" ? (
+                  <Link href="/espace-membre" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
+                      <LayoutDashboard className="mr-2 h-5 w-5" />
+                      Espace Membre
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/connexion" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Se Connecter
+                    </Button>
+                  </Link>
+                )}
               </motion.div>
             </motion.nav>
           </motion.div>

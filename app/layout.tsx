@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SessionProvider } from '@/components/session-provider'
+import { PwaProvider } from '@/components/pwa-provider'
 import { NetworkStatus } from '@/components/network-status'
 import { PwaInstallButton } from '@/components/pwa-install-button'
 import './globals.css'
@@ -83,16 +84,18 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NetworkStatus />
-            {children}
-            <PwaInstallButton />
-          </ThemeProvider>
+          <PwaProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NetworkStatus />
+              {children}
+              <PwaInstallButton />
+            </ThemeProvider>
+          </PwaProvider>
         </SessionProvider>
         <Analytics />
       </body>
