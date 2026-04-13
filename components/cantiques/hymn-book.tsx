@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, Book, Music, ChevronRight, X, 
   Grid, List, BookOpen, Heart, Share2, Copy,
-  ChevronDown, Filter
+  ChevronDown, Filter, ChevronLeft
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +30,7 @@ export function HymnBook() {
   const [selectedCategory, setSelectedCategory] = useState("Tous")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedHymn, setSelectedHymn] = useState<Cantique | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [copied, setCopied] = useState(false)
 
@@ -42,6 +43,22 @@ export function HymnBook() {
       return matchesSearch && matchesCategory
     })
   }, [searchQuery, selectedCategory])
+
+  const goToNextHymn = () => {
+    if (selectedIndex < filteredHymns.length - 1) {
+      const nextIndex = selectedIndex + 1
+      setSelectedIndex(nextIndex)
+      setSelectedHymn(filteredHymns[nextIndex])
+    }
+  }
+
+  const goToPrevHymn = () => {
+    if (selectedIndex > 0) {
+      const prevIndex = selectedIndex - 1
+      setSelectedIndex(prevIndex)
+      setSelectedHymn(filteredHymns[prevIndex])
+    }
+  }
 
   const toggleFavorite = (id: number) => {
     setFavorites(prev => {
@@ -144,7 +161,10 @@ export function HymnBook() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
               className="group bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-all cursor-pointer"
-              onClick={() => setSelectedHymn(hymn)}
+              onClick={() => {
+                setSelectedHymn(hymn)
+                setSelectedIndex(index)
+              }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -192,7 +212,10 @@ export function HymnBook() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.02 }}
               className="group flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 transition-all cursor-pointer"
-              onClick={() => setSelectedHymn(hymn)}
+              onClick={() => {
+                setSelectedHymn(hymn)
+                setSelectedIndex(index)
+              }}
             >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <span className="font-bold text-primary">{hymn.id}</span>
@@ -242,7 +265,12 @@ export function HymnBook() {
       )}
 
       {/* Hymn Detail Modal */}
-      <Dialog open={!!selectedHymn} onOpenChange={() => setSelectedHymn(null)}>
+      <Dialog open={!!selectedHymn} onOpenChange={(open) => {
+        if (!open) {
+            setSelectedHymn(null)
+            setSelectedIndex(-1)
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           {selectedHymn && (
             <>
@@ -255,6 +283,27 @@ export function HymnBook() {
                     <p className="text-muted-foreground mt-1">
                       {selectedHymn.reference} - {selectedHymn.category}
                     </p>
+                  </div>
+                  <div className="flex items-center gap-2 mr-6">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={goToPrevHymn}
+                        disabled={selectedIndex <= 0}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-xs font-mono">{selectedIndex + 1} / {filteredHymns.length}</span>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={goToNextHymn}
+                        disabled={selectedIndex >= filteredHymns.length - 1}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </DialogHeader>

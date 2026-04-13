@@ -1,39 +1,83 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Tv, BookOpen, Quote, Info } from "lucide-react"
+import { Tv, BookOpen, Quote, Info, ChevronLeft, ChevronRight, ArrowLeft, RefreshCw } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function LiveMemberPage() {
   const [activeSlide, setActiveSlide] = useState<any>(null)
+  const [slides, setSlides] = useState<any[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [sessionTitle, setSessionTitle] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [isFollowingLive, setIsFollowingLive] = useState(true)
+  const [liveSlideId, setLiveSlideId] = useState<string | null>(null)
+
+  const fetchActiveSlide = useCallback(async () => {
+    try {
+      const response = await fetch('/api/live/active')
+      const data = await response.json()
+      if (data.activeSession) {
+        setSlides(data.activeSession.slides || [])
+        setSessionTitle(data.activeSession.sermonTitle)
+        setLiveSlideId(data.activeSession.activeSlideId)
+
+        if (isFollowingLive) {
+          const index = data.activeSession.slides.findIndex((s: any) => s.id === data.activeSession.activeSlideId)
+          if (index !== -1) {
+            setCurrentIndex(index)
+            setActiveSlide(data.activeSession.slides[index])
+          }
+        }
+      } else {
+        setActiveSlide(null)
+        setSlides([])
+        setSessionTitle("")
+        setLiveSlideId(null)
+      }
+    } catch (error) {
+      console.error("Failed to fetch active slide")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isFollowingLive])
 
   useEffect(() => {
-    const fetchActiveSlide = async () => {
-      try {
-        const response = await fetch('/api/live/active')
-        const data = await response.json()
-        if (data.activeSession) {
-          setActiveSlide(data.activeSession.activeSlide)
-          setSessionTitle(data.activeSession.sermonTitle)
-        } else {
-          setActiveSlide(null)
-          setSessionTitle("")
-        }
-      } catch (error) {
-        console.error("Failed to fetch active slide")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchActiveSlide()
     const interval = setInterval(fetchActiveSlide, 2000) // Poll every 2 seconds
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchActiveSlide])
+
+  const goToNext = () => {
+    if (currentIndex < slides.length - 1) {
+      const nextIndex = currentIndex + 1
+      setCurrentIndex(nextIndex)
+      setActiveSlide(slides[nextIndex])
+      setIsFollowingLive(false)
+    }
+  }
+
+  const goToPrev = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1
+      setCurrentIndex(prevIndex)
+      setActiveSlide(slides[prevIndex])
+      setIsFollowingLive(false)
+    }
+  }
+
+  const syncWithLive = () => {
+    setIsFollowingLive(true)
+    const index = slides.findIndex((s: any) => s.id === liveSlideId)
+    if (index !== -1) {
+      setCurrentIndex(index)
+      setActiveSlide(slides[index])
+    }
+  }
 
   if (isLoading) {
     return (
@@ -45,15 +89,34 @@ export default function LiveMemberPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="relative">
-          <Tv className="h-6 w-6 text-primary" />
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" asChild className="mr-2">
+                <Link href="/espace-membre">
+                    <ArrowLeft className="h-5 w-5" />
+                </Link>
+            </Button>
+            <div className="relative">
+            <Tv className="h-6 w-6 text-primary" />
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            </div>
+            <h1 className="text-2xl font-bold">Session en Direct</h1>
         </div>
-        <h1 className="text-2xl font-bold">Session en Direct</h1>
+
+        {!isFollowingLive && activeSlide && (
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={syncWithLive}
+                className="text-red-500 border-red-200 hover:bg-red-50 gap-2"
+            >
+                <RefreshCw className="h-4 w-4" />
+                Synchroniser avec le Live
+            </Button>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -78,11 +141,40 @@ export default function LiveMemberPage() {
             transition={{ duration: 0.3 }}
           >
             <div className="mb-4 flex items-center justify-between">
-                <Badge variant="outline" className="text-xs uppercase tracking-wider">{sessionTitle}</Badge>
-                <Badge className="bg-primary">{activeSlide.type}</Badge>
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs uppercase tracking-wider">{sessionTitle}</Badge>
+                    {isFollowingLive && <Badge className="bg-red-500 animate-pulse text-[10px] h-5">LIVE</Badge>}
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground mr-2">{currentIndex + 1} / {slides.length}</span>
+                    <Badge className="bg-primary">{activeSlide.type}</Badge>
+                </div>
             </div>
 
-            <Card className="overflow-hidden border-none shadow-2xl bg-gradient-to-br from-card to-secondary/30 min-h-[400px] flex items-center justify-center p-8 md:p-12">
+            <Card className="relative overflow-hidden border-none shadow-2xl bg-gradient-to-br from-card to-secondary/30 min-h-[400px] flex items-center justify-center p-8 md:p-12">
+                <div className="absolute inset-y-0 left-0 flex items-center">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-full rounded-none hover:bg-primary/5 opacity-0 hover:opacity-100 transition-opacity"
+                        onClick={goToPrev}
+                        disabled={currentIndex === 0}
+                    >
+                        <ChevronLeft className="h-8 w-8" />
+                    </Button>
+                </div>
+                <div className="absolute inset-y-0 right-0 flex items-center">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-full rounded-none hover:bg-primary/5 opacity-0 hover:opacity-100 transition-opacity"
+                        onClick={goToNext}
+                        disabled={currentIndex === slides.length - 1}
+                    >
+                        <ChevronRight className="h-8 w-8" />
+                    </Button>
+                </div>
+
               <CardContent className="w-full text-center space-y-8">
                 {activeSlide.type === 'VERSE' && (
                   <div className="space-y-6">
@@ -139,11 +231,23 @@ export default function LiveMemberPage() {
               </CardContent>
             </Card>
 
+            <div className="mt-4 flex items-center justify-center gap-4 md:hidden">
+                <Button variant="outline" size="icon" onClick={goToPrev} disabled={currentIndex === 0}>
+                    <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <span className="text-sm font-medium">{currentIndex + 1} / {slides.length}</span>
+                <Button variant="outline" size="icon" onClick={goToNext} disabled={currentIndex === slides.length - 1}>
+                    <ChevronRight className="h-5 w-5" />
+                </Button>
+            </div>
+
             <div className="mt-8 p-4 bg-primary/5 rounded-2xl flex items-start gap-4 border border-primary/10">
                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <p className="text-sm text-muted-foreground">
-                    Les slides s'actualisent automatiquement à mesure que le prédicateur avance dans son message.
-                    Restez connecté pour ne rien manquer.
+                    {isFollowingLive
+                        ? "Les slides s'actualisent automatiquement. Vous pouvez naviguer manuellement avec les flèches."
+                        : "Synchronisation automatique désactivée. Cliquez sur 'Synchroniser avec le Live' pour suivre le prédicateur."
+                    }
                 </p>
             </div>
           </motion.div>
