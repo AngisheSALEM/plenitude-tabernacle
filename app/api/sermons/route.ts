@@ -1,0 +1,55 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  try {
+    const sermons = await prisma.sermon.findMany({
+      where: session.user.role === 'ADMIN' ? {} : { authorId: session.user.id },
+      orderBy: { updatedAt: 'desc' },
+      include: { slides: true }
+    });
+    return NextResponse.json({ sermons });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch sermons' }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'PREDICATEUR')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { title, content, slides } = await req.json();
+
+    const sermon = await prisma.sermon.create({
+      data: {
+        title,
+        content,
+        authorId: session.user.id,
+        slides: {
+          create: slides.map((s: any, index: number) => ({
+            content: s.content,
+            type: s.type,
+            metadata: s.metadata,
+            order: index,
+          }))
+        }
+      },
+      include: { slides: true }
+    });
+
+    return NextResponse.json({ sermon });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to save sermon' }, { status: 500 });
+  }
+}
