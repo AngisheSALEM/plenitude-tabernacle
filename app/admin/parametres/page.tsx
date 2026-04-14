@@ -25,7 +25,7 @@ export default function AdminSettingsPage() {
   const [churchInfo, setChurchInfo] = useState({
     name: "Plenitude Tabernacle",
     description: "Une eglise vivante au coeur de Kinshasa, engagee dans la proclamation de l&apos;Evangile et le service de la communaute.",
-    address: "Avenue de la Liberte, Kinshasa, RDC",
+    address: "03 Av. Mafuta, Q. Mfinda, Ngaliema, Kinshasa, RDC",
     phone: "+243 999 123 456",
     email: "contact@plenitude-tabernacle.cd",
     website: "www.plenitude-tabernacle.cd"
