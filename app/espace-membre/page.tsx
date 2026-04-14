@@ -659,7 +659,7 @@ export default function EspaceMembrePage() {
               <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <div className="aspect-[4/3] lg:aspect-auto lg:h-[500px]">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.5289682959007!2d15.2662934!3d-4.3246379!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a6a33c76c7c7c7c%3A0x1c7c7c7c7c7c7c7c!2sKinshasa%2C%20Democratic%20Republic%20of%20the%20Congo!5e0!3m2!1sen!2s!4v1234567890"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.472856525944!2d15.232468211029272!3d-4.352512146958869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a6a3130fa579c95%3A0x87a7ed5ea0d45413!2s-4.352517%2C%2015.234657!5e0!3m2!1sfr!2scd!4v1710000000000!5m2!1sfr!2scd"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}
@@ -685,8 +685,8 @@ export default function EspaceMembrePage() {
                       <div>
                         <h3 className="font-medium text-foreground">Adresse</h3>
                         <p className="text-muted-foreground">
-                          Avenue de la Paix, N 123<br />
-                          Commune de Gombe<br />
+                          03 Av. Mafuta, Q. Mfinda<br />
+                          Commune de Ngaliema<br />
                           Kinshasa, RD Congo
                         </p>
                       </div>
@@ -718,7 +718,10 @@ export default function EspaceMembrePage() {
                   </div>
                 </div>
 
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full py-6">
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full py-6"
+                  onClick={() => window.open("https://maps.app.goo.gl/ZT9YKAkDYa12Le2ZA", "_blank")}
+                >
                   <MapPin className="mr-2 h-5 w-5" />
                   Ouvrir dans Google Maps
                 </Button>

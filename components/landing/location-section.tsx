@@ -46,10 +46,10 @@ export function LocationSection() {
           >
             <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-border bg-card">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d254835.78236661376!2d15.20978765!3d-4.4419311!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a6a3130fa579c95%3A0x87a7ed5ea0d45413!2sKinshasa%2C%20Democratic%20Republic%20of%20the%20Congo!5e0!3m2!1sen!2sus!4v1710000000000!5m2!1sen!2sus"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.472856525944!2d15.232468211029272!3d-4.352512146958869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a6a3130fa579c95%3A0x87a7ed5ea0d45413!2s-4.352517%2C%2015.234657!5e0!3m2!1sfr!2scd!4v1710000000000!5m2!1sfr!2scd"
                 width="100%"
                 height="100%"
-                style={{ border: 0, filter: "grayscale(100%) contrast(1.1)" }}
+                style={{ border: 0, filter: "contrast(1.1)" }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -71,9 +71,9 @@ export function LocationSection() {
                 <div>
                   <h4 className="font-semibold text-foreground">Plénitude Tabernacle</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Avenue de la Libération, Kinshasa
+                    03 Av. Mafuta, Q. Mfinda
                     <br />
-                    République Démocratique du Congo
+                    Commune de Ngaliema, Kinshasa
                   </p>
                 </div>
               </div>
