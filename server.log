@@ -1,0 +1,31 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+✓ Ready in 1270ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[next-auth][error][NO_SECRET]
+https://next-auth.js.org/errors#no_secret
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/error?error=Configuration 302 in 4.8s (next.js: 4.7s, application-code: 71ms)
+○ Compiling /connexion ...
+ GET /connexion?error=Configuration 200 in 7.9s (next.js: 7.0s, proxy.ts: 19ms, application-code: 955ms)
+ GET /api/auth/session 200 in 689ms (next.js: 630ms, application-code: 59ms)
+[next-auth][error][NO_SECRET]
+https://next-auth.js.org/errors#no_secret
+ GET /api/auth/error?error=Configuration 302 in 21ms (next.js: 6ms, application-code: 15ms)
+ GET /connexion?error=Configuration 200 in 147ms (next.js: 6ms, proxy.ts: 9ms, application-code: 132ms)
+ GET /api/auth/session 200 in 20ms (next.js: 4ms, application-code: 15ms)
+[?25h

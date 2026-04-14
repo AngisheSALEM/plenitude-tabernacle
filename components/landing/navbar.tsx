@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, LogIn, LayoutDashboard } from "lucide-react"
+import { Menu, X, LogIn, LayoutDashboard, Shield, Mic } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -74,15 +74,41 @@ export function Navbar() {
             <div className="hidden lg:flex items-center gap-3">
               <ThemeToggle />
               {status === "authenticated" ? (
-                <Link href="/espace-membre">
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
-                  >
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Espace Membre
-                  </Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                  {session?.user?.role === "ADMIN" && (
+                    <Link href="/admin">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full px-4 text-muted-foreground hover:text-foreground"
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+                  {(session?.user?.role === "PREDICATEUR" || session?.user?.role === "ADMIN") && (
+                    <Link href="/predicateur">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full px-4 text-muted-foreground hover:text-foreground"
+                      >
+                        <Mic className="mr-2 h-4 w-4" />
+                        Prédicateur
+                      </Button>
+                    </Link>
+                  )}
+                  <Link href="/espace-membre">
+                    <Button
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6"
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Espace Membre
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 <Link href="/connexion">
                   <Button
@@ -159,12 +185,30 @@ export function Navbar() {
                 className="space-y-3"
               >
                 {status === "authenticated" ? (
-                  <Link href="/espace-membre" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
-                      <LayoutDashboard className="mr-2 h-5 w-5" />
-                      Espace Membre
-                    </Button>
-                  </Link>
+                  <div className="space-y-3">
+                    {session?.user?.role === "ADMIN" && (
+                      <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full py-6 text-lg rounded-full">
+                          <Shield className="mr-2 h-5 w-5" />
+                          Espace Admin
+                        </Button>
+                      </Link>
+                    )}
+                    {(session?.user?.role === "PREDICATEUR" || session?.user?.role === "ADMIN") && (
+                      <Link href="/predicateur" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full py-6 text-lg rounded-full">
+                          <Mic className="mr-2 h-5 w-5" />
+                          Espace Prédicateur
+                        </Button>
+                      </Link>
+                    )}
+                    <Link href="/espace-membre" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
+                        <LayoutDashboard className="mr-2 h-5 w-5" />
+                        Espace Membre
+                      </Button>
+                    </Link>
+                  </div>
                 ) : (
                   <Link href="/connexion" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg rounded-full">
