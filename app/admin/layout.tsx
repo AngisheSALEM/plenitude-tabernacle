@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { useSession } from "next-auth/react"
 
 const sidebarLinks = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
@@ -35,6 +36,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { data: session } = useSession()
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
@@ -128,11 +130,19 @@ export default function AdminLayout({
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary text-sm font-semibold">JM</span>
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                {session?.user?.image ? (
+                  <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-primary text-sm font-semibold">
+                    {session?.user?.firstName ? session.user.firstName[0] : (session?.user?.name ? session.user.name[0] : "A")}
+                  </span>
+                )}
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-foreground">Joel Mugisho</p>
+                <p className="text-sm font-medium text-foreground">
+                  {session?.user?.firstName ? `${session.user.firstName} ${session.user.lastName || ""}` : (session?.user?.name || "Administrateur")}
+                </p>
                 <p className="text-xs text-muted-foreground">Administrateur</p>
               </div>
             </div>

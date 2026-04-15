@@ -8,8 +8,9 @@ import {
   Calendar, Clock, Search, Filter, Grid, List,
   Heart, Share2, CheckCircle, ArrowRight, User,
   ChevronDown, X, LogOut, Settings, Bell, Book, Music,
-  Tv, Smartphone
+  Tv, Smartphone, Shield, Mic
 } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -25,6 +26,7 @@ import {
 import { HymnBook } from "@/components/cantiques/hymn-book"
 
 export default function EspaceMembrePage() {
+  const { data: session } = useSession()
   const [allVideos, setAllVideos] = useState<any[]>([])
   const [allAudio, setAllAudio] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -157,6 +159,25 @@ export default function EspaceMembrePage() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  {session?.user?.role === "ADMIN" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Espace Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {(session?.user?.role === "PREDICATEUR" || session?.user?.role === "ADMIN") && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/predicateur">
+                        <Mic className="mr-2 h-4 w-4" />
+                        Espace Prédicateur
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {(session?.user?.role === "ADMIN" || session?.user?.role === "PREDICATEUR") && (
+                    <DropdownMenuSeparator />
+                  )}
                   <DropdownMenuItem asChild>
                     <Link href="/connexion" className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
