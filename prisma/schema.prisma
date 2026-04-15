@@ -9,6 +9,7 @@ datasource db {
 enum Role {
   ADMIN
   MEMBRE
+  PREDICATEUR
 }
 
 model User {
