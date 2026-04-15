@@ -304,9 +304,9 @@ export default function AdminUsersPage() {
                     </div>
                   </motion.div>
                 ))}
-              </>
+              </div>
+            </>
           )}
-          </div>
         </CardContent>
       </Card>
 

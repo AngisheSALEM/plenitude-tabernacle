@@ -1,0 +1,20 @@
+
+> my-project@0.1.0 dev /app
+> next dev -p 5000 -H 0.0.0.0
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+✓ Ready in 543ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[next-auth][error][NO_SECRET]
+https://next-auth.js.org/errors#no_secret
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/error?error=Configuration 302 in 2.8s (next.js: 2.7s, application-code: 68ms)
+○ Compiling /connexion ...
+ GET /connexion?error=Configuration 200 in 8.5s (next.js: 7.4s, proxy.ts: 14ms, application-code: 1071ms)
+ GET /api/auth/session 200 in 157ms (next.js: 111ms, application-code: 46ms)
