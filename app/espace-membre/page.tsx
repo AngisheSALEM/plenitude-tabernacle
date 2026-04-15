@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { HymnBook } from "@/components/cantiques/hymn-book"
+import { useAuth } from "@/hooks/useAuth"
 
 // Mock data for videos
 const allVideos = [
@@ -48,6 +49,7 @@ const allAudio = [
 ]
 
 export default function EspaceMembrePage() {
+  const { isAdmin } = useAuth()
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchQuery, setSearchQuery] = useState("")
@@ -146,6 +148,14 @@ export default function EspaceMembrePage() {
                       Parametres
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <User className="mr-2 h-4 w-4" />
+                        Administration
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/connexion" className="text-destructive">
