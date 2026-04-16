@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Video, 
@@ -16,106 +17,73 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-
-const stats = [
-  {
-    title: "Total Videos",
-    value: "156",
-    change: "+12",
-    changeLabel: "ce mois",
-    icon: Video,
-    color: "bg-blue-500/10 text-blue-500"
-  },
-  {
-    title: "Total Audio",
-    value: "89",
-    change: "+5",
-    changeLabel: "ce mois",
-    icon: Headphones,
-    color: "bg-purple-500/10 text-purple-500"
-  },
-  {
-    title: "Membres",
-    value: "2,847",
-    change: "+234",
-    changeLabel: "ce mois",
-    icon: Users,
-    color: "bg-green-500/10 text-green-500"
-  },
-  {
-    title: "Vues totales",
-    value: "45.2K",
-    change: "+18%",
-    changeLabel: "vs mois dernier",
-    icon: Eye,
-    color: "bg-primary/10 text-primary"
-  },
-]
-
-const recentSermons = [
-  {
-    id: 1,
-    title: "La puissance de la resurrection",
-    type: "VIDEO",
-    date: "2026-03-28",
-    views: 1234,
-    speaker: "Pasteur Joel Mugisho"
-  },
-  {
-    id: 2,
-    title: "Marcher dans la foi",
-    type: "AUDIO",
-    date: "2026-03-25",
-    views: 856,
-    speaker: "Pasteur Joel Mugisho"
-  },
-  {
-    id: 3,
-    title: "La grace suffisante",
-    type: "VIDEO",
-    date: "2026-03-22",
-    views: 2341,
-    speaker: "Pasteur Joel Mugisho"
-  },
-  {
-    id: 4,
-    title: "Vivre par l&apos;Esprit",
-    type: "AUDIO",
-    date: "2026-03-20",
-    views: 678,
-    speaker: "Pasteur Joel Mugisho"
-  },
-]
-
-const upcomingEvents = [
-  {
-    title: "Culte du Dimanche",
-    date: "Dim 30 Mars",
-    time: "09:00",
-    type: "Culte"
-  },
-  {
-    title: "Etude Biblique",
-    date: "Mer 02 Avril",
-    time: "18:00",
-    type: "Enseignement"
-  },
-  {
-    title: "Nuit de Priere",
-    date: "Ven 04 Avril",
-    time: "21:00",
-    type: "Priere"
-  },
-]
+import { useSession } from "next-auth/react"
 
 export default function AdminDashboard() {
+  const { data: session } = useSession()
+  const [data, setData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/admin/stats")
+        const json = await res.json()
+        setData(json)
+      } catch (error) {
+        console.error("Erreur lors du chargement des stats:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  const stats = [
+    {
+      title: "Total Videos",
+      value: data?.stats?.videos || 0,
+      change: "+0",
+      changeLabel: "ce mois",
+      icon: Video,
+      color: "bg-blue-500/10 text-blue-500"
+    },
+    {
+      title: "Total Audio",
+      value: data?.stats?.audio || 0,
+      change: "+0",
+      changeLabel: "ce mois",
+      icon: Headphones,
+      color: "bg-purple-500/10 text-purple-500"
+    },
+    {
+      title: "Membres",
+      value: data?.stats?.users || 0,
+      change: "+0",
+      changeLabel: "ce mois",
+      icon: Users,
+      color: "bg-green-500/10 text-green-500"
+    },
+    {
+      title: "Vues totales",
+      value: data?.stats?.views || 0,
+      change: "+0%",
+      changeLabel: "vs mois dernier",
+      icon: Eye,
+      color: "bg-primary/10 text-primary"
+    },
+  ]
+
+  const recentSermons = data?.recentContent || []
+  const upcomingEvents = data?.upcomingEvents || []
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-serif font-bold text-foreground">
-            Bienvenue, Pasteur Joel
+            Bienvenue, {session?.user?.firstName || "Pasteur"}
           </h2>
           <p className="text-muted-foreground">
             Voici un apercu de votre plateforme aujourd&apos;hui.
@@ -158,7 +126,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {isLoading ? "..." : stat.value.toLocaleString()}
+                  </p>
                   <p className="text-sm text-muted-foreground">{stat.title}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">{stat.changeLabel}</p>
@@ -185,34 +155,40 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentSermons.map((sermon) => (
-                <div 
-                  key={sermon.id}
-                  className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    {sermon.type === "VIDEO" ? (
-                      <Video className="h-5 w-5 text-primary" />
-                    ) : (
-                      <Headphones className="h-5 w-5 text-primary" />
-                    )}
+              {isLoading ? (
+                <p className="text-center py-8 text-muted-foreground">Chargement...</p>
+              ) : recentSermons.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">Aucune prédication récente</p>
+              ) : (
+                recentSermons.map((sermon: any) => (
+                  <div
+                    key={`${sermon.type}-${sermon.id}`}
+                    className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      {sermon.type === "VIDEO" ? (
+                        <Video className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Headphones className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{sermon.title}</p>
+                      <p className="text-sm text-muted-foreground">{sermon.speaker}</p>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        {sermon.views}
+                      </span>
+                      <span>{new Date(sermon.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                    </div>
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <Play className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{sermon.title}</p>
-                    <p className="text-sm text-muted-foreground">{sermon.speaker}</p>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      {sermon.views}
-                    </span>
-                    <span>{new Date(sermon.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
-                  </div>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <Play className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -226,30 +202,36 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingEvents.map((event, index) => (
-                <div 
-                  key={index}
-                  className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-primary/30 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                    <Calendar className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground">{event.title}</p>
-                    <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                      <span>{event.date}</span>
-                      <span>-</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {event.time}
+              {isLoading ? (
+                <p className="text-center py-8 text-muted-foreground">Chargement...</p>
+              ) : upcomingEvents.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">Aucun événement à venir</p>
+              ) : (
+                upcomingEvents.map((event: any, index: number) => (
+                  <div
+                    key={`event-${index}-${event.title}`}
+                    className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-primary/30 transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                      <Calendar className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{event.title}</p>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <span>{event.date}</span>
+                        <span>-</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {event.time}
+                        </span>
+                      </div>
+                      <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {event.type}
                       </span>
                     </div>
-                    <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {event.type}
-                    </span>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

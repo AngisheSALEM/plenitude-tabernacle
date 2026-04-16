@@ -35,7 +35,7 @@ export function NetworkStatus() {
     }
   }, [])
 
-  if (!mounted) return null
+  if (!mounted || typeof window === "undefined") return null
 
   return (
     <AnimatePresence>
