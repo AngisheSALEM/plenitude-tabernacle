@@ -11,26 +11,14 @@
   "categories": ["religion", "lifestyle"],
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
+      "src": "/app-logo.png",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icon-maskable-512.png",
-      "sizes": "512x512",
+      "src": "/app-logo.png",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "maskable"
     }
@@ -41,14 +29,14 @@
       "short_name": "Vidéos",
       "description": "Voir les prédications vidéo",
       "url": "/videos",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/app-logo.png", "sizes": "any" }]
     },
     {
       "name": "Audio",
       "short_name": "Audio",
       "description": "Écouter les prédications audio",
       "url": "/audio",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/app-logo.png", "sizes": "any" }]
     }
   ],
   "screenshots": []

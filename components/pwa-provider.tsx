@@ -45,7 +45,10 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const installApp = async () => {
-    if (!deferredPrompt) return
+    if (!deferredPrompt) {
+      alert("Pour installer l'application :\n\nSur iOS (Safari) : Appuyez sur le bouton 'Partager' et choisissez 'Sur l'écran d'accueil'.\n\nSur Android/Chrome : Appuyez sur les trois points (menu) et choisissez 'Installer l'application'.")
+      return
+    }
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     if (outcome === "accepted") {
