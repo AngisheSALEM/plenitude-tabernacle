@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
   ArrowLeft, Bell, Lock, Palette, 
@@ -33,8 +34,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-export default function ParametresPage() {
+function ParametresContent() {
   const { isInstallable, isStandalone, installApp } = usePwa()
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get("tab") || "notifications"
+  const [activeTab, setActiveTab] = useState(initialTab)
+
+  useEffect(() => {
+    const tab = searchParams.get("tab")
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab)
+    }
+  }, [searchParams, activeTab])
+
   const [settings, setSettings] = useState({
     // Notifications
     emailNotifications: true,
@@ -107,7 +119,7 @@ export default function ParametresPage() {
             </p>
           </motion.div>
 
-          <Tabs defaultValue="notifications" className="space-y-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="bg-secondary p-1 rounded-xl w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="notifications" className="rounded-lg flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Bell className="mr-2 h-4 w-4" />
@@ -284,9 +296,10 @@ export default function ParametresPage() {
                       <Button
                         onClick={installApp}
                         className="shrink-0"
+                        disabled={isStandalone}
                       >
                         <AppWindow className="mr-2 h-4 w-4" />
-                        Installer
+                        {isStandalone ? "Déjà installé" : "Installer"}
                       </Button>
                     </div>
                   </div>
@@ -527,5 +540,17 @@ export default function ParametresPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ParametresPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ParametresContent />
+    </Suspense>
   )
 }

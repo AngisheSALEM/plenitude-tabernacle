@@ -11,6 +11,7 @@ import {
   Tv, Smartphone, Shield, Mic
 } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { usePwa } from "@/components/pwa-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,6 +28,7 @@ import { HymnBook } from "@/components/cantiques/hymn-book"
 
 export default function EspaceMembrePage() {
   const { data: session } = useSession()
+  const { isStandalone, installApp } = usePwa()
   const [allVideos, setAllVideos] = useState<any[]>([])
   const [allAudio, setAllAudio] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -123,12 +125,17 @@ export default function EspaceMembrePage() {
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link href="/parametres?tab=preferences">
-                <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2 border-primary/30 text-primary">
+              {!isStandalone && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 border-primary/30 text-primary"
+                  onClick={installApp}
+                >
                   <Smartphone className="h-4 w-4" />
                   Installer l'App
                 </Button>
-              </Link>
+              )}
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
