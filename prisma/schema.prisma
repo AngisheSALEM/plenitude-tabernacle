@@ -151,6 +151,7 @@ model Sermon {
   content     String   @db.Text
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
+  isShared    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   slides      Slide[]

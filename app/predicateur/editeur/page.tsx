@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Save, Tv, Split, ArrowLeft, Trash2 } from "lucide-react"
+import { Save, Tv, Split, ArrowLeft, Trash2, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,7 @@ export default function EditeurSermon() {
   const [slides, setSlides] = useState<any[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
 
   const handleGenerateSlides = async () => {
     if (!content.trim()) {
@@ -44,13 +45,15 @@ export default function EditeurSermon() {
     }
   }
 
-  const handleSave = async () => {
+  const handleSave = async (shareAfterSave = false) => {
     if (!title.trim()) {
       toast.error("Veuillez donner un titre à votre message.")
       return
     }
 
-    setIsSaving(true)
+    if (shareAfterSave) setIsSharing(true)
+    else setIsSaving(true)
+
     try {
       const response = await fetch('/api/sermons', {
         method: 'POST',
@@ -59,13 +62,29 @@ export default function EditeurSermon() {
       })
       const data = await response.json()
       if (data.sermon) {
-        toast.success("Message enregistré avec succès !")
-        router.push(`/predicateur/live/${data.sermon.id}`)
+        if (shareAfterSave) {
+          const shareRes = await fetch(`/api/sermons/${data.sermon.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isShared: true }),
+          })
+          if (shareRes.ok) {
+            toast.success("Enregistré et envoyé à l'admin !")
+            router.push('/predicateur')
+          } else {
+            toast.success("Enregistré, mais erreur lors de l'envoi.")
+            router.push(`/predicateur/live/${data.sermon.id}`)
+          }
+        } else {
+          toast.success("Message enregistré avec succès !")
+          router.push(`/predicateur/live/${data.sermon.id}`)
+        }
       }
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement.")
     } finally {
       setIsSaving(false)
+      setIsSharing(false)
     }
   }
 
@@ -91,7 +110,11 @@ export default function EditeurSermon() {
               <Split className="mr-2 h-4 w-4" />
               Transformer en Slides
             </Button>
-            <Button className="bg-primary hover:bg-primary/90" onClick={handleSave} disabled={isSaving}>
+            <Button variant="outline" className="text-primary border-primary/20" onClick={() => handleSave(true)} disabled={isSharing || isSaving}>
+              <Send className="mr-2 h-4 w-4" />
+              Partager avec l&apos;Admin
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90" onClick={() => handleSave(false)} disabled={isSaving || isSharing}>
               <Save className="mr-2 h-4 w-4" />
               Enregistrer
             </Button>

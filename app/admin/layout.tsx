@@ -25,6 +25,7 @@ const sidebarLinks = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/audio", label: "Audio", icon: Headphones },
+  { href: "/admin/sermons", label: "Prédications", icon: Book },
   { href: "/admin/cantiques", label: "Cantiques", icon: Book },
   { href: "/admin/annonces", label: "Annonces", icon: Megaphone },
   { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },

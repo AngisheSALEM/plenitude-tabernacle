@@ -10,7 +10,8 @@ import {
   Calendar,
   Clock,
   ArrowUpRight,
-  Play
+  Play,
+  BookOpen
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -285,6 +286,14 @@ export default function AdminDashboard() {
                   <TrendingUp className="h-5 w-5 text-green-500" />
                 </div>
                 <p className="mt-3 text-sm font-medium text-foreground">Nouvelle Annonce</p>
+              </div>
+            </Link>
+            <Link href="/admin/sermons">
+              <div className="p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer text-center group">
+                <div className="w-12 h-12 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookOpen className="h-5 w-5 text-orange-500" />
+                </div>
+                <p className="mt-3 text-sm font-medium text-foreground">Gérer Live</p>
               </div>
             </Link>
             <Link href="/admin/parametres">
