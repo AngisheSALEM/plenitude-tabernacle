@@ -15,20 +15,45 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import { Send } from "lucide-react"
 
 export default function PredicateurDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sermons, setSermons] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchSermons = () => {
+    setIsLoading(true)
     fetch('/api/sermons')
       .then(res => res.json())
       .then(data => {
         if (data.sermons) setSermons(data.sermons)
         setIsLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchSermons()
   }, [])
+
+  const handleShare = async (id: string) => {
+    try {
+      const response = await fetch(`/api/sermons/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isShared: true }),
+      })
+      if (response.ok) {
+        toast.success("Message envoyé à l'admin !")
+        fetchSermons()
+      } else {
+        toast.error("Erreur lors de l'envoi")
+      }
+    } catch (error) {
+      toast.error("Erreur réseau")
+    }
+  }
 
   const filteredSermons = sermons.filter(s =>
     s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -85,8 +110,24 @@ export default function PredicateurDashboard() {
                                         {new Date(sermon.updatedAt).toLocaleDateString()}
                                     </span>
                                     <Badge variant="outline" className="text-[10px]">{sermon.slides?.length || 0} slides</Badge>
+                                    {sermon.isShared && (
+                                        <Badge variant="secondary" className="bg-green-500/10 text-green-500 hover:bg-green-500/20 text-[10px] border-green-500/20">
+                                            Envoyé à l&apos;admin
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
+                            {!sermon.isShared && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="mr-2 text-primary hover:text-primary/80 hover:bg-primary/5"
+                                    onClick={() => handleShare(sermon.id)}
+                                >
+                                    <Send className="mr-1 h-3.5 w-3.5" />
+                                    Partager
+                                </Button>
+                            )}
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href={`/predicateur/live/${sermon.id}`}>
                                     Gérer

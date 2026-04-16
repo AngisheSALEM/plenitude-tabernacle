@@ -5,15 +5,37 @@ import { authOptions } from '@/lib/auth';
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const { searchParams } = new URL(req.url);
+  const sharedOnly = searchParams.get('shared') === 'true';
+
   try {
+    let whereClause: any = {};
+
+    if (session.user.role === 'ADMIN') {
+      if (sharedOnly) {
+        whereClause.isShared = true;
+      }
+    } else {
+      whereClause.authorId = session.user.id;
+    }
+
     const sermons = await prisma.sermon.findMany({
-      where: session.user.role === 'ADMIN' ? {} : { authorId: session.user.id },
+      where: whereClause,
       orderBy: { updatedAt: 'desc' },
-      include: { slides: true }
+      include: {
+        slides: true,
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          }
+        }
+      }
     });
     return NextResponse.json({ sermons });
   } catch (error) {
