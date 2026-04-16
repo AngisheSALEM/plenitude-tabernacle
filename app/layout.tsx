@@ -35,20 +35,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/app-logo.png',
+        type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
-    shortcut: '/icon-192.png',
+    apple: '/app-logo.png',
+    shortcut: '/app-logo.png',
   },
   other: {
     'mobile-web-app-capable': 'yes',
