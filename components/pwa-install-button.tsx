@@ -34,6 +34,8 @@ export function PwaInstallButton() {
     localStorage.setItem("pwa-install-dismissed", "1")
   }
 
+  if (typeof window === "undefined") return null
+
   return (
     <AnimatePresence>
       {isVisible && !isDismissed && (
