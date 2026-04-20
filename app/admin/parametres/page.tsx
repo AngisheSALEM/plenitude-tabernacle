@@ -11,8 +11,10 @@ import {
   Globe,
   Save,
   Facebook,
-  Youtube
+  Youtube,
+  RefreshCw
 } from "lucide-react"
+import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,12 +47,36 @@ export default function AdminSettingsPage() {
     twitter: ""
   })
 
+  const [youtubeSync, setYoutubeSync] = useState({
+    playlistId: "PLPNLjERB0V6CQLtDMHkck2JhHCG9JXusa",
+    isSyncing: false
+  })
+
   const [features, setFeatures] = useState({
     enableLiveStream: true,
     enableMemberArea: true,
     enableComments: false,
     enableDownloads: true
   })
+
+  const handleSyncVideos = async () => {
+    setYoutubeSync(prev => ({ ...prev, isSyncing: true }))
+    try {
+      const res = await fetch(`/api/sync-youtube?playlistId=${youtubeSync.playlistId}`)
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success(`Synchronisation réussie : ${data.stats.total} vidéos traitées`)
+      } else {
+        toast.error(data.error || "Erreur lors de la synchronisation")
+      }
+    } catch (error) {
+      console.error("Sync error:", error)
+      toast.error("Erreur réseau lors de la synchronisation")
+    } finally {
+      setYoutubeSync(prev => ({ ...prev, isSyncing: false }))
+    }
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -69,6 +95,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="schedule">Horaires</TabsTrigger>
           <TabsTrigger value="social">Reseaux sociaux</TabsTrigger>
+          <TabsTrigger value="youtube">YouTube</TabsTrigger>
           <TabsTrigger value="features">Fonctionnalites</TabsTrigger>
         </TabsList>
 
@@ -231,6 +258,50 @@ export default function AdminSettingsPage() {
             <Save className="mr-2 h-4 w-4" />
             Enregistrer les horaires
           </Button>
+        </TabsContent>
+
+        {/* YouTube Tab */}
+        <TabsContent value="youtube" className="space-y-6">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Youtube className="h-5 w-5 text-primary" />
+                Synchronisation YouTube
+              </CardTitle>
+              <CardDescription>
+                Gérez la synchronisation automatique des vidéos depuis votre chaîne YouTube.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="playlistId">ID de la Playlist YouTube</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="playlistId"
+                    value={youtubeSync.playlistId}
+                    onChange={(e) => setYoutubeSync({ ...youtubeSync, playlistId: e.target.value })}
+                    className="bg-background border-border"
+                    placeholder="PL..."
+                  />
+                  <Button
+                    onClick={handleSyncVideos}
+                    disabled={youtubeSync.isSyncing}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
+                  >
+                    {youtubeSync.isSyncing ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                    )}
+                    Synchroniser maintenant
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Cette playlist sera utilisée pour importer automatiquement les nouvelles vidéos sur le site.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Social Tab */}
