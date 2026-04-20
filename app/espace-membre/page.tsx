@@ -8,7 +8,7 @@ import {
   Calendar, Clock, Search, Filter, Grid, List,
   Heart, Share2, CheckCircle, ArrowRight, User,
   ChevronDown, X, LogOut, Settings, Bell, Book, Music,
-  Tv, Smartphone, Shield, Mic
+  Tv, Smartphone, Shield, Mic, ChevronLeft, ChevronRight, RefreshCw
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { usePwa } from "@/components/pwa-provider"
@@ -25,6 +25,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { HymnBook } from "@/components/cantiques/hymn-book"
+import { extractYoutubeId } from "@/lib/youtube"
+import { toast } from "sonner"
 
 export default function EspaceMembrePage() {
   const { data: session } = useSession()
@@ -34,28 +36,57 @@ export default function EspaceMembrePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [selectedVideo, setSelectedVideo] = useState<any | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
+  const [isSyncing, setIsSyncing] = useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const [videosRes, audioRes] = await Promise.all([
-          fetch("/api/videos?limit=100"),
-          fetch("/api/audio?limit=100")
-        ])
+  const fetchData = async () => {
+    setIsLoading(true)
 
-        const videosData = await videosRes.json()
-        const audioData = await audioRes.json()
-
-        setAllVideos(videosData.videos || [])
-        setAllAudio(audioData.audios || [])
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error)
-      } finally {
-        setIsLoading(false)
+    // Fetch videos independently
+    try {
+      const res = await fetch("/api/videos?limit=100")
+      if (res.ok) {
+        const data = await res.json()
+        setAllVideos(data.videos || [])
       }
+    } catch (error) {
+      console.error("Erreur videos:", error)
     }
 
+    // Fetch audio independently
+    try {
+      const res = await fetch("/api/audio?limit=100")
+      if (res.ok) {
+        const data = await res.json()
+        setAllAudio(data.audios || [])
+      }
+    } catch (error) {
+      console.error("Erreur audio:", error)
+    }
+
+    setIsLoading(false)
+  }
+
+  const handleSync = async () => {
+    setIsSyncing(true)
+    try {
+      const res = await fetch("/api/sync-youtube")
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(`Synchronisation réussie : ${data.stats?.total ?? 0} vidéos`)
+        fetchData()
+      } else {
+        toast.error(data.error || "Erreur de synchronisation")
+      }
+    } catch (error) {
+      toast.error("Erreur réseau")
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  useEffect(() => {
     fetchData()
   }, [])
   const [searchQuery, setSearchQuery] = useState("")
@@ -88,6 +119,22 @@ export default function EspaceMembrePage() {
 
   const downloadedVideos = allVideos.filter(v => v.downloaded)
   const downloadedAudio = allAudio.filter(a => a.downloaded)
+
+  const goToNextVideo = () => {
+    if (selectedIndex < filteredVideos.length - 1) {
+      const nextIndex = selectedIndex + 1
+      setSelectedIndex(nextIndex)
+      setSelectedVideo(filteredVideos[nextIndex])
+    }
+  }
+
+  const goToPrevVideo = () => {
+    if (selectedIndex > 0) {
+      const prevIndex = selectedIndex - 1
+      setSelectedIndex(prevIndex)
+      setSelectedVideo(filteredVideos[prevIndex])
+    }
+  }
 
   const handleDownload = async (type: string, id: string) => {
     const key = `${type}-${id}`
@@ -321,7 +368,34 @@ export default function EspaceMembrePage() {
               <p className="text-muted-foreground">
                 {filteredVideos.length} predication{filteredVideos.length > 1 ? "s" : ""} disponible{filteredVideos.length > 1 ? "s" : ""}
               </p>
+              {session?.user?.role === "ADMIN" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  className="border-primary/30 text-primary"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  Sync YouTube
+                </Button>
+              )}
             </div>
+
+            {filteredVideos.length === 0 && (
+              <div className="text-center py-20 bg-card border border-dashed border-border rounded-2xl">
+                <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium">Aucune vidéo trouvée</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto mt-2">
+                  Nous n'avons pas encore de vidéos à afficher ici ou votre recherche n'a retourné aucun résultat.
+                </p>
+                {session?.user?.role === "ADMIN" && (
+                  <Button variant="default" className="mt-6" onClick={handleSync} disabled={isSyncing}>
+                    Lancer la synchronisation
+                  </Button>
+                )}
+              </div>
+            )}
 
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -331,11 +405,24 @@ export default function EspaceMembrePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all"
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setSelectedIndex(index);
+                    }}
+                    className="group bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all cursor-pointer"
                   >
                     <div className="relative aspect-video bg-muted">
+                      {video.thumbnail ? (
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                      )}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="h-6 w-6 text-primary-foreground ml-1" />
                         </div>
                       </div>
@@ -356,10 +443,18 @@ export default function EspaceMembrePage() {
                       <p className="text-sm text-muted-foreground mb-2">{video.speaker}</p>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>{formatDate(video.date)}</span>
-                        <span>{video.views.toLocaleString()} vues</span>
+                        <span>{(video.views ?? 0).toLocaleString()} vues</span>
                       </div>
                       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                        <Button variant="ghost" size="sm" className="flex-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Logic for favorite could go here
+                          }}
+                        >
                           <Heart className="mr-1 h-4 w-4" />
                           Favoris
                         </Button>
@@ -367,7 +462,10 @@ export default function EspaceMembrePage() {
                           variant="ghost" 
                           size="sm" 
                           className="flex-1"
-                          onClick={() => handleDownload("video", video.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload("video", video.id);
+                          }}
                           disabled={downloadingItems.has(`video-${video.id}`) || video.downloaded}
                         >
                           {downloadingItems.has(`video-${video.id}`) ? (
@@ -390,11 +488,24 @@ export default function EspaceMembrePage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className="group flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 transition-all"
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setSelectedIndex(index);
+                    }}
+                    className="group flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 transition-all cursor-pointer"
                   >
                     <div className="relative w-40 aspect-video bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                      {video.thumbnail ? (
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                      )}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
                         </div>
                       </div>
@@ -414,7 +525,7 @@ export default function EspaceMembrePage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Play className="h-3 w-3" />
-                          {video.views.toLocaleString()} vues
+                          {(video.views ?? 0).toLocaleString()} vues
                         </span>
                         {video.downloaded && (
                           <span className="flex items-center gap-1 text-primary">
@@ -425,16 +536,31 @@ export default function EspaceMembrePage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
                         <Heart className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
                         <Share2 className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleDownload("video", video.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload("video", video.id);
+                        }}
                         disabled={downloadingItems.has(`video-${video.id}`) || video.downloaded}
                       >
                         {downloadingItems.has(`video-${video.id}`) ? (
@@ -758,6 +884,121 @@ export default function EspaceMembrePage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/95 backdrop-blur-xl"
+          onClick={() => {
+            setSelectedVideo(null)
+            setSelectedIndex(-1)
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative w-full max-w-5xl bg-card rounded-3xl overflow-hidden border border-border flex flex-col md:flex-row"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-10 rounded-full bg-background/50 backdrop-blur-sm"
+              onClick={() => {
+                setSelectedVideo(null)
+                setSelectedIndex(-1)
+              }}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+
+            {/* Video Player */}
+            <div className="relative aspect-video bg-muted flex-1">
+              {selectedVideo.youtubeUrl ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(selectedVideo.youtubeUrl)}?autoplay=1`}
+                  title={selectedVideo.title}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                  <p className="text-primary-foreground">Vidéo non disponible</p>
+                </div>
+              )}
+
+              {/* Navigation Controls */}
+              <div className="absolute inset-y-0 left-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToPrevVideo();
+                  }}
+                  disabled={selectedIndex <= 0}
+                >
+                  <ChevronLeft className="h-10 w-10" />
+                </Button>
+              </div>
+              <div className="absolute inset-y-0 right-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToNextVideo();
+                  }}
+                  disabled={selectedIndex >= filteredVideos.length - 1}
+                >
+                  <ChevronRight className="h-10 w-10" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Video Info */}
+            <div className="p-6 md:w-80 flex flex-col">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-3">
+                    {selectedVideo.category}
+                  </span>
+                  <h2 className="font-serif text-2xl font-bold text-foreground">
+                    {selectedVideo.title}
+                  </h2>
+                </div>
+              </div>
+              <p className="text-muted-foreground mb-4 text-sm line-clamp-4">{selectedVideo.description}</p>
+              <div className="mt-auto space-y-3">
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    {selectedVideo.speaker}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(selectedVideo.date)}
+                  </span>
+                </div>
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => handleDownload("video", selectedVideo.id)}
+                  disabled={downloadingItems.has(`video-${selectedVideo.id}`) || selectedVideo.downloaded}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  {selectedVideo.downloaded ? "Téléchargé" : "Télécharger"}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   )
 }

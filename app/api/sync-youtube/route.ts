@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Configuration YouTube manquante (API Key)" }, { status: 500 });
     }
 
+    console.log(`[SYNC-YOUTUBE] Démarrage de la synchronisation pour la playlist: ${PLAYLIST_ID}`);
+
     let syncedCount = 0;
     let updatedCount = 0;
     let nextPageToken = "";
@@ -48,8 +50,9 @@ export async function GET(req: NextRequest) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("[SYNC-YOUTUBE] Erreur API YouTube", errorData);
-        return NextResponse.json({ error: "Erreur lors de la récupération des vidéos YouTube" }, { status: 502 });
+        console.error("[SYNC-YOUTUBE] Erreur API YouTube", JSON.stringify(errorData, null, 2));
+        const errorMessage = errorData.error?.message || "Erreur lors de la récupération des vidéos YouTube";
+        return NextResponse.json({ error: errorMessage }, { status: 502 });
       }
 
       const data = await response.json();

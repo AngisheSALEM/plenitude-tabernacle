@@ -66,7 +66,8 @@ export default function AdminSettingsPage() {
       const data = await res.json()
 
       if (res.ok) {
-        toast.success(`Synchronisation réussie : ${data.stats.total} vidéos traitées`)
+        const total = data.stats?.total ?? 0;
+        toast.success(`Synchronisation réussie : ${total} vidéos traitées`)
       } else {
         toast.error(data.error || "Erreur lors de la synchronisation")
       }
