@@ -1,22 +1,32 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const PLAYLIST_ID = process.env.PLAYLIST_ID;
+const DEFAULT_PLAYLIST_ID = "PLPNLjERB0V6CQLtDMHkck2JhHCG9JXusa";
 const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(req: NextRequest) {
   try {
-    // Vérification de sécurité pour Vercel Cron Job
-    // Si CRON_SECRET n'est pas configuré ou ne correspond pas au header, on refuse l'accès
+    const { searchParams } = new URL(req.url);
+    const playlistIdParam = searchParams.get("playlistId");
+    const PLAYLIST_ID = playlistIdParam || process.env.PLAYLIST_ID || DEFAULT_PLAYLIST_ID;
+
+    // Vérification de sécurité : Vercel Cron Job (Bearer Token) OU Session ADMIN
     const authHeader = req.headers.get('authorization');
-    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === "ADMIN";
+
+    const isCronAuthorized = CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
+
+    if (!isCronAuthorized && !isAdmin) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    if (!YOUTUBE_API_KEY || !PLAYLIST_ID) {
-      return NextResponse.json({ error: "Configuration YouTube manquante (API Key ou Playlist ID)" }, { status: 500 });
+    if (!YOUTUBE_API_KEY) {
+      return NextResponse.json({ error: "Configuration YouTube manquante (API Key)" }, { status: 500 });
     }
 
     let syncedCount = 0;
