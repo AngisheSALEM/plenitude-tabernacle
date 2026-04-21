@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/client"
 }
 
 datasource db {
@@ -33,6 +34,7 @@ model User {
   favoriteVideos    FavoriteVideo[]
   favoriteAudios    FavoriteAudio[]
   favoriteCantiques FavoriteCantique[]
+  sermons           Sermon[]
 
   @@map("users")
 }
@@ -86,7 +88,7 @@ model Video {
   views       Int      @default(0)
   duration    String?
   thumbnail   String?
-  youtubeUrl  String?
+  youtubeUrl  String?  @unique
   isFeatured  Boolean  @default(false)
   category    String
   createdAt   DateTime @default(now())
@@ -141,6 +143,46 @@ model Evenement {
   updatedAt DateTime  @updatedAt
 
   @@map("evenements")
+}
+
+model Sermon {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  isShared    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  slides      Slide[]
+  liveSessions LiveSession[]
+
+  @@map("sermons")
+}
+
+model Slide {
+  id        String   @id @default(cuid())
+  sermonId  String
+  sermon    Sermon   @relation(fields: [sermonId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  type      String   @default("TEXT") // TEXT, VERSE, CITATION
+  metadata  Json?    // { book, chapter, verse } or { name, paragraph, location, date, image }
+  order     Int
+  createdAt DateTime @default(now())
+
+  @@map("slides")
+}
+
+model LiveSession {
+  id             String   @id @default(cuid())
+  sermonId       String
+  sermon         Sermon   @relation(fields: [sermonId], references: [id])
+  activeSlideId  String?
+  isActive       Boolean  @default(true)
+  startedAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("live_sessions")
 }
 
 model FavoriteVideo {

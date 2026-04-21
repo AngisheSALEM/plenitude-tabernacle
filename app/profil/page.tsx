@@ -91,7 +91,11 @@ export default function ProfilPage() {
   useEffect(() => {
     fetch("/api/profil")
       .then((r) => {
-        if (!r.ok) throw new Error("Non autorise")
+        if (!r.ok) {
+          const error = new Error(r.status === 401 ? "Non autorise" : "Erreur serveur")
+          ;(error as any).status = r.status
+          throw error
+        }
         return r.json()
       })
       .then((data) => {
@@ -142,17 +146,22 @@ export default function ProfilPage() {
           bio: profile.bio,
         })
       })
-      .catch(() => {
-        router.push("/connexion")
+      .catch((err) => {
+        console.error("Erreur lors du chargement du profil:", err)
+        if (err.message === "Non autorise" || err.status === 401) {
+          router.push("/connexion")
+        }
       })
   }, [])
 
   const handleSave = async () => {
     setIsSaving(true)
+    // Ne pas envoyer l'email s'il n'a pas changé ou du tout
+    const { email, ...updateData } = editForm
     const res = await fetch("/api/profil", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
+      body: JSON.stringify(updateData),
     })
     setIsSaving(false)
     if (res.ok) {
@@ -182,6 +191,31 @@ export default function ProfilPage() {
       month: "long",
       year: "numeric",
     })
+  }
+
+  const getDisplayName = () => {
+    const fullName = `${user.firstName} ${user.lastName}`.trim()
+    if (!fullName || fullName === ".") {
+      return user.email.split("@")[0]
+    }
+    return fullName
+  }
+
+  const getInitials = () => {
+    const first = user.firstName?.trim()
+    const last = user.lastName?.trim()
+
+    if (first && first !== "." && last && last !== ".") {
+      return (first[0] + last[0]).toUpperCase()
+    }
+    if (first && first !== ".") return first[0].toUpperCase()
+    if (last && last !== ".") return last[0].toUpperCase()
+
+    if (user.email && user.email.length > 0) {
+      return user.email[0].toUpperCase()
+    }
+
+    return "U"
   }
 
   return (
@@ -227,10 +261,10 @@ export default function ProfilPage() {
               <div className="relative">
                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.firstName} className="w-full h-full rounded-full object-cover" />
+                    <img src={user.avatar} alt={getDisplayName()} className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <span className="font-serif text-4xl md:text-5xl font-bold text-primary">
-                      {user.firstName?.[0]}{user.lastName?.[0]}
+                      {getInitials()}
                     </span>
                   )}
                 </div>
@@ -244,7 +278,7 @@ export default function ProfilPage() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                      {user.firstName} {user.lastName}
+                      {getDisplayName()}
                     </h1>
                     <p className="text-muted-foreground mt-1">{user.email}</p>
                     <div className="flex items-center gap-2 mt-2">
@@ -379,7 +413,7 @@ export default function ProfilPage() {
               <h2 className="font-serif text-xl font-bold text-foreground mb-6">Mes informations</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {[
-                  { icon: User, label: "Nom complet", value: `${user.firstName} ${user.lastName}` },
+                  { icon: User, label: "Nom complet", value: getDisplayName() },
                   { icon: Mail, label: "Email", value: user.email },
                   { icon: Phone, label: "Telephone", value: user.phone || "—" },
                   { icon: MapPin, label: "Adresse", value: user.address || "—" },

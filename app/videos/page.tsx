@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
 import { formatDate } from "@/lib/format"
+import { extractYoutubeId } from "@/lib/youtube"
 
 const categories = [
   "Toutes",
@@ -26,14 +27,19 @@ interface Video {
   duration: string | null
   category: string
   description: string | null
+  thumbnail: string | null
+  youtubeUrl: string | null
 }
 
 const categoryMap: Record<string, string> = {
-  Predication: "Predications",
-  Enseignement: "Enseignements",
-  Louange: "Louange",
-  Temoignage: "Temoignages",
-  Conference: "Conferences",
+  "Predication": "Predications",
+  "Prédication": "Predications",
+  "Enseignement": "Enseignements",
+  "Louange": "Louange",
+  "Temoignage": "Temoignages",
+  "Témoignage": "Temoignages",
+  "Conference": "Conferences",
+  "Conférence": "Conferences",
 }
 
 export default function VideosPage() {
@@ -41,6 +47,7 @@ export default function VideosPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
   const [videos, setVideos] = useState<Video[]>([])
 
   useEffect(() => {
@@ -58,6 +65,22 @@ export default function VideosPage() {
       video.speaker.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
+
+  const goToNextVideo = () => {
+    if (selectedIndex < filteredVideos.length - 1) {
+      const nextIndex = selectedIndex + 1
+      setSelectedIndex(nextIndex)
+      setSelectedVideo(filteredVideos[nextIndex])
+    }
+  }
+
+  const goToPrevVideo = () => {
+    if (selectedIndex > 0) {
+      const prevIndex = selectedIndex - 1
+      setSelectedIndex(prevIndex)
+      setSelectedVideo(filteredVideos[prevIndex])
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -163,12 +186,23 @@ export default function VideosPage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedVideo(video)}
+                  onClick={() => {
+                    setSelectedVideo(video)
+                    setSelectedIndex(index)
+                  }}
                   className="group cursor-pointer"
                 >
                   {/* Thumbnail */}
                   <div className="relative aspect-video rounded-2xl overflow-hidden bg-card border border-border/50 mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    )}
                     
                     {/* Category badge */}
                     <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary/90 text-xs font-medium text-primary-foreground">
@@ -222,12 +256,23 @@ export default function VideosPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedVideo(video)}
+                  onClick={() => {
+                    setSelectedVideo(video)
+                    setSelectedIndex(index)
+                  }}
                   className="group flex gap-6 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer"
                 >
                   {/* Thumbnail */}
                   <div className="relative w-48 aspect-video rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20" />
+                    )}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="p-3 rounded-full bg-primary/90">
                         <Play className="h-5 w-5 text-primary-foreground fill-current" />
@@ -278,33 +323,67 @@ export default function VideosPage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-xl"
-          onClick={() => setSelectedVideo(null)}
+          onClick={() => {
+            setSelectedVideo(null)
+            setSelectedIndex(-1)
+          }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-5xl bg-card rounded-3xl overflow-hidden border border-border"
+            className="relative w-full max-w-5xl bg-card rounded-3xl overflow-hidden border border-border flex flex-col md:flex-row"
             onClick={(e) => e.stopPropagation()}
           >
             <Button
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 rounded-full bg-background/50 backdrop-blur-sm"
-              onClick={() => setSelectedVideo(null)}
+              onClick={() => {
+                setSelectedVideo(null)
+                setSelectedIndex(-1)
+              }}
             >
               <X className="h-5 w-5" />
             </Button>
 
-            {/* Video Player Placeholder */}
-            <div className="relative aspect-video bg-muted">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-6 rounded-full bg-primary/90"
+            {/* Video Player */}
+            <div className="relative aspect-video bg-muted flex-1">
+              {selectedVideo.youtubeUrl ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(selectedVideo.youtubeUrl)}?autoplay=1`}
+                  title={selectedVideo.title}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                  <p className="text-primary-foreground">Vidéo non disponible</p>
+                </div>
+              )}
+
+              {/* Navigation Controls */}
+              <div className="absolute inset-y-0 left-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={goToPrevVideo}
+                  disabled={selectedIndex <= 0}
                 >
-                  <Play className="h-12 w-12 text-primary-foreground fill-current" />
-                </motion.button>
+                  <ChevronLeft className="h-10 w-10" />
+                </Button>
+              </div>
+              <div className="absolute inset-y-0 right-0 flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-full rounded-none hover:bg-black/20 opacity-0 hover:opacity-100 transition-opacity text-white"
+                  onClick={goToNextVideo}
+                  disabled={selectedIndex >= filteredVideos.length - 1}
+                >
+                  <ChevronRight className="h-10 w-10" />
+                </Button>
               </div>
             </div>
 

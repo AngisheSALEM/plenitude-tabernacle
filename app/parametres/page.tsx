@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
   ArrowLeft, Bell, Lock, Palette, 
   Smartphone, Eye, EyeOff, Save, User, Mail,
   Download, Trash2, HelpCircle, MessageSquare, FileText,
-  ChevronRight, Check
+  ChevronRight, Check, AppWindow
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { usePwa } from "@/components/pwa-provider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -32,7 +34,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-export default function ParametresPage() {
+function ParametresContent() {
+  const { isInstallable, isStandalone, installApp } = usePwa()
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get("tab") || "notifications"
+  const [activeTab, setActiveTab] = useState(initialTab)
+
+  useEffect(() => {
+    const tab = searchParams.get("tab")
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab)
+    }
+  }, [searchParams, activeTab])
+
   const [settings, setSettings] = useState({
     // Notifications
     emailNotifications: true,
@@ -105,7 +119,7 @@ export default function ParametresPage() {
             </p>
           </motion.div>
 
-          <Tabs defaultValue="notifications" className="space-y-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="bg-secondary p-1 rounded-xl w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="notifications" className="rounded-lg flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Bell className="mr-2 h-4 w-4" />
@@ -261,6 +275,32 @@ export default function ParametresPage() {
                         </p>
                       </div>
                       <ThemeToggle />
+                    </div>
+                  </div>
+                </div>
+
+                {/* PWA Installation */}
+                <div className="bg-card border border-border rounded-2xl p-6">
+                  <h2 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+                    <Smartphone className="h-5 w-5 text-primary" />
+                    Application
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                      <div className="flex-1 mr-4">
+                        <p className="font-medium text-foreground">Obtenez l&apos;app</p>
+                        <p className="text-sm text-muted-foreground">
+                          Installez Plénitude sur votre écran d&apos;accueil pour un accès rapide et hors ligne.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={installApp}
+                        className="shrink-0"
+                        disabled={isStandalone}
+                      >
+                        <AppWindow className="mr-2 h-4 w-4" />
+                        {isStandalone ? "Déjà installé" : "Installer"}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -500,5 +540,17 @@ export default function ParametresPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ParametresPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ParametresContent />
+    </Suspense>
   )
 }

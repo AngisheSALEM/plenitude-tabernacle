@@ -4,14 +4,10 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Download, X, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
-}
+import { usePwa } from "@/components/pwa-provider"
 
 export function PwaInstallButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const { isInstallable, installApp } = usePwa()
   const [isVisible, setIsVisible] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
 
@@ -19,30 +15,17 @@ export function PwaInstallButton() {
     const dismissed = localStorage.getItem("pwa-install-dismissed")
     if (dismissed) return
 
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      setTimeout(() => setIsVisible(true), 3000)
-    }
-
-    window.addEventListener("beforeinstallprompt", handler)
-
-    window.addEventListener("appinstalled", () => {
+    if (isInstallable) {
+      const timer = setTimeout(() => setIsVisible(true), 3000)
+      return () => clearTimeout(timer)
+    } else {
       setIsVisible(false)
-      setDeferredPrompt(null)
-    })
-
-    return () => window.removeEventListener("beforeinstallprompt", handler)
-  }, [])
+    }
+  }, [isInstallable])
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return
-    await deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
-    if (outcome === "accepted") {
-      setIsVisible(false)
-      setDeferredPrompt(null)
-    }
+    await installApp()
+    setIsVisible(false)
   }
 
   const handleDismiss = () => {
@@ -50,6 +33,8 @@ export function PwaInstallButton() {
     setIsDismissed(true)
     localStorage.setItem("pwa-install-dismissed", "1")
   }
+
+  if (typeof window === "undefined") return null
 
   return (
     <AnimatePresence>

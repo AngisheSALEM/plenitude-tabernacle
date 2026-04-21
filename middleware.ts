@@ -6,8 +6,16 @@ export default withAuth(
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
 
-    if (pathname.startsWith("/admin") && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/espace-membre", req.url))
+    if (token) {
+      if (pathname === "/" || pathname === "/connexion" || pathname === "/inscription") {
+        return NextResponse.redirect(new URL("/espace-membre", req.url))
+      }
+      if (pathname.startsWith("/admin") && token?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/espace-membre", req.url))
+      }
+      if (pathname.startsWith("/predicateur") && token?.role !== "PREDICATEUR" && token?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/espace-membre", req.url))
+      }
     }
 
     return NextResponse.next()
@@ -16,7 +24,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
+        if (pathname === "/" || pathname === "/connexion" || pathname === "/inscription") return true
         if (pathname.startsWith("/admin")) return !!token
+        if (pathname.startsWith("/predicateur")) return !!token
         if (pathname.startsWith("/espace-membre")) return !!token
         if (pathname.startsWith("/profil")) return !!token
         if (pathname.startsWith("/parametres")) return !!token
@@ -26,14 +36,18 @@ export default withAuth(
     pages: {
       signIn: "/connexion",
     },
+    secret: process.env.NEXTAUTH_SECRET,
   }
 )
 
 export const config = {
   matcher: [
+    "/",
     "/espace-membre/:path*",
     "/profil/:path*",
     "/admin/:path*",
     "/parametres/:path*",
+    "/connexion",
+    "/inscription",
   ],
 }

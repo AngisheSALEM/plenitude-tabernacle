@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SessionProvider } from '@/components/session-provider'
+import { PwaProvider } from '@/components/pwa-provider'
 import { NetworkStatus } from '@/components/network-status'
 import { PwaInstallButton } from '@/components/pwa-install-button'
 import './globals.css'
@@ -34,20 +35,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/app-logo.png',
+        type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
-    shortcut: '/icon-192.png',
+    apple: '/app-logo.png',
+    shortcut: '/app-logo.png',
   },
   other: {
     'mobile-web-app-capable': 'yes',
@@ -71,28 +64,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Plénitude" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
-        <meta name="application-name" content="Plénitude" />
-        <meta name="msapplication-TileColor" content="#800020" />
-        <meta name="msapplication-tap-highlight" content="no" />
-      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NetworkStatus />
-            {children}
-            <PwaInstallButton />
-          </ThemeProvider>
+          <PwaProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NetworkStatus />
+              {children}
+              <PwaInstallButton />
+            </ThemeProvider>
+          </PwaProvider>
         </SessionProvider>
         <Analytics />
       </body>

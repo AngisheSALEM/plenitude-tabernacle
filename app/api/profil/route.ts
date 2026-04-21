@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    return NextResponse.json({ user })
   } catch (error) {
     console.error("[PROFIL GET]", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
@@ -57,7 +58,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json()
     const { firstName, lastName, phone, address, birthDate, bio, avatar } = body
 
-    if (body.email) {
+    if (body.email && body.email !== session.user.email) {
       return NextResponse.json(
         { error: "La modification de l'email n'est pas autorisée ici" },
         { status: 400 }

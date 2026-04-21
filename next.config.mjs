@@ -17,7 +17,13 @@ const nextConfig = {
   allowedDevOrigins: [
     "f92ac4d0-0a15-4441-8e03-924e048085e4-00-2e0rhtg5j0jfs.spock.replit.dev",
   ],
-  turbopack: {},
+  serverExternalPackages: ["@prisma/client", "pg"],
+  experimental: {},
+  turbopack: {
+    resolveAlias: {
+      ".prisma/client/default": "./generated/client/default.js",
+    },
+  },
 }
 
 export default withSerwist(nextConfig)
