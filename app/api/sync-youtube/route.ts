@@ -48,12 +48,33 @@ export async function GET(req: NextRequest) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("[SYNC-YOUTUBE] Erreur API YouTube", errorData);
+        console.error("[SYNC-YOUTUBE] Erreur API YouTube (playlistItems)", errorData);
         return NextResponse.json({ error: "Erreur lors de la récupération des vidéos YouTube" }, { status: 502 });
       }
 
       const data = await response.json();
       const items = data.items || [];
+
+      if (items.length === 0) break;
+
+      // Récupérer les détails supplémentaires (durée) pour toutes les vidéos de cette page
+      const videoIds = items.map((item: any) => item.snippet.resourceId?.videoId).filter(Boolean).join(',');
+
+      let videoDetailsMap = new Map();
+      if (videoIds) {
+        const detailsUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
+        detailsUrl.searchParams.append("part", "contentDetails");
+        detailsUrl.searchParams.append("id", videoIds);
+        detailsUrl.searchParams.append("key", YOUTUBE_API_KEY);
+
+        const detailsResponse = await fetch(detailsUrl.toString());
+        if (detailsResponse.ok) {
+          const detailsData = await detailsResponse.json();
+          detailsData.items?.forEach((v: any) => {
+            videoDetailsMap.set(v.id, v.contentDetails?.duration);
+          });
+        }
+      }
 
       for (const item of items) {
         const { snippet } = item;
@@ -66,30 +87,56 @@ export async function GET(req: NextRequest) {
         const thumbnail = snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || snippet.thumbnails?.default?.url;
         const publishedAt = snippet.publishedAt;
 
+        // Convertir la durée ISO 8601 (ex: PT1H2M10S) en format lisible (ex: 1:02:10)
+        const isoDuration = videoDetailsMap.get(videoId);
+        let duration = "0:00";
+        if (isoDuration) {
+          const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+          if (match) {
+            const h = match[1] ? parseInt(match[1]) : 0;
+            const m = match[2] ? parseInt(match[2]) : 0;
+            const s = match[3] ? parseInt(match[3]) : 0;
+
+            if (h > 0) {
+              duration = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            } else {
+              duration = `${m}:${s.toString().padStart(2, '0')}`;
+            }
+          }
+        }
+
         // On utilise prisma.video.upsert car youtubeUrl est maintenant @unique
         console.log(`[SYNC-YOUTUBE] Traitement de la vidéo: ${title} (${videoId})`);
-        const video = await prisma.video.upsert({
+
+        // Tentative d'extraction du prédicateur depuis le titre ou la description
+        let speaker = "Pasteur";
+        const speakerMatch = title.match(/Pasteur\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i) ||
+                           description.match(/Prédicateur\s*:\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+        if (speakerMatch) {
+          speaker = speakerMatch[1];
+        }
+
+        await prisma.video.upsert({
           where: { youtubeUrl },
           update: {
             title,
             description,
             thumbnail,
+            duration,
           },
           create: {
             title,
             description,
             youtubeUrl,
             thumbnail,
+            duration,
             date: new Date(publishedAt),
-            speaker: "Pasteur", // Valeur par défaut
-            category: "Predication", // Valeur par défaut (sans accent pour match UI)
+            speaker: speaker,
+            category: "Predication",
             isFeatured: false,
           }
         });
 
-        // Prisma upsert retourne l'objet créé ou mis à jour.
-        // Pour compter séparément, il faudrait vérifier la date de création vs mise à jour
-        // mais ici on va juste incrémenter le total pour simplifier l'API.
         totalProcessed++;
       }
 
