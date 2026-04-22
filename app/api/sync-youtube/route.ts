@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        // On utilise prisma.video.upsert car youtubeUrl est maintenant @unique
+        // Vérifier si la vidéo existe déjà
         console.log(`[SYNC-YOUTUBE] Traitement de la vidéo: ${title} (${videoId})`);
 
         // Tentative d'extraction du prédicateur depuis le titre ou la description
@@ -116,26 +116,38 @@ export async function GET(req: NextRequest) {
           speaker = speakerMatch[1];
         }
 
-        await prisma.video.upsert({
-          where: { youtubeUrl },
-          update: {
-            title,
-            description,
-            thumbnail,
-            duration,
-          },
-          create: {
-            title,
-            description,
-            youtubeUrl,
-            thumbnail,
-            duration,
-            date: new Date(publishedAt),
-            speaker: speaker,
-            category: "Predication",
-            isFeatured: false,
-          }
+        // Vérifier si la vidéo existe déjà
+        const existingVideo = await prisma.video.findUnique({
+          where: { youtubeUrl }
         });
+
+        if (existingVideo) {
+          // Mettre à jour la vidéo existante
+          await prisma.video.update({
+            where: { id: existingVideo.id },
+            data: {
+              title,
+              description,
+              thumbnail,
+              duration,
+            }
+          });
+        } else {
+          // Créer une nouvelle vidéo
+          await prisma.video.create({
+            data: {
+              title,
+              description,
+              youtubeUrl,
+              thumbnail,
+              duration,
+              date: new Date(publishedAt),
+              speaker: speaker,
+              category: "Predication",
+              isFeatured: false,
+            }
+          });
+        }
 
         totalProcessed++;
       }
