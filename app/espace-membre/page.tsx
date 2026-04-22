@@ -28,15 +28,12 @@ import { HymnBook } from "@/components/cantiques/hymn-book"
 import { useAuth } from "@/hooks/useAuth"
 
 export default function EspaceMembrePage() {
-<<<<<<< HEAD
   const { isAdmin } = useAuth()
-=======
   const { data: session } = useSession()
   const { isStandalone, installApp } = usePwa()
   const [allVideos, setAllVideos] = useState<any[]>([])
   const [allAudio, setAllAudio] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
->>>>>>> e71f2a1cdfb65ef7bb642a7390ee9b4628670eaf
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedVideo, setSelectedVideo] = useState<any | null>(null)
