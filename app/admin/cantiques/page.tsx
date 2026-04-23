@@ -43,9 +43,11 @@ import {
 } from "@/components/ui/table"
 
 const categories = [
-  "Adoration", "Amour", "Aspiration", "Benediction", "Ciel",
+  "Adoration", "Autres", "Chants de Victoire", "Collection", "Crois seulement",
+  "Hosanna", "Louange", "Roc Séculaire", "Symphonie",
+  "Amour", "Aspiration", "Benediction", "Ciel",
   "Combat spirituel", "Communion", "Confiance", "Consecration", "Delivrance",
-  "Esperance", "Foi", "Grace", "Jesus", "Louange",
+  "Esperance", "Foi", "Grace", "Jesus",
   "Marche", "Mission", "Priere", "Redemption", "Refuge",
   "Saint-Esprit", "Soumission", "Temoignage"
 ]

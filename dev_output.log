@@ -1,0 +1,29 @@
+
+> my-project@0.1.0 dev
+> next dev -p 5000 -H 0.0.0.0
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:5000
+- Network:       http://0.0.0.0:5000
+- Environments: .env
+✓ Ready in 604ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+○ Compiling /connexion ...
+ GET /connexion?callbackUrl=%2Fespace-membre 200 in 7.9s (next.js: 7.0s, proxy.ts: 5ms, application-code: 931ms)
+ GET /api/auth/session 200 in 4.2s (next.js: 4.1s, application-code: 53ms)
+ GET /connexion 200 in 126ms (next.js: 6ms, proxy.ts: 10ms, application-code: 110ms)
+ GET /api/auth/session 200 in 56ms (next.js: 35ms, application-code: 21ms)
+ GET /connexion 200 in 117ms (next.js: 6ms, proxy.ts: 7ms, application-code: 104ms)
+ GET /api/auth/session 200 in 54ms (next.js: 32ms, application-code: 23ms)
+(node:135886) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /api/cantiques?limit=1 200 in 1881ms (next.js: 1070ms, application-code: 812ms)
+ GET /api/cantiques?search=CROIS%20SEULEMENT&limit=5 200 in 317ms (next.js: 5ms, application-code: 312ms)
