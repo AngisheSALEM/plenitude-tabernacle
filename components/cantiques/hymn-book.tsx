@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, Book, Music, ChevronRight, X, 
   Grid, List, BookOpen, Heart, Share2, Copy,
-  ChevronDown, Filter, ChevronLeft
+  ChevronDown, Filter, ChevronLeft, Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cantiques, categories, type Cantique } from "@/lib/cantiques-data"
+import { type Cantique } from "@/lib/cantiques-data"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,23 +26,54 @@ import {
 } from "@/components/ui/dialog"
 
 export function HymnBook() {
+  const [cantiques, setCantiques] = useState<Cantique[]>([])
+  const [categories, setCategories] = useState<string[]>(["Tous"])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Tous")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedHymn, setSelectedHymn] = useState<Cantique | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number>(-1)
-  const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    const fetchCantiques = async () => {
+      setIsLoading(true)
+      try {
+        const response = await fetch("/api/cantiques?limit=1000")
+        if (!response.ok) throw new Error("Erreur lors du chargement des cantiques")
+        const data = await response.json()
+        const fetchedCantiques = data.cantiques || []
+
+        // Use a functional type for the fetched items if needed, but the interface Cantique should match
+        // The API returns lyrics and chorus as Json, which are arrays of strings in our case
+        setCantiques(fetchedCantiques)
+
+        const cats = Array.from(new Set(fetchedCantiques.map((c: any) => c.category))) as string[]
+        setCategories(["Tous", ...cats.sort()])
+      } catch (err) {
+        console.error(err)
+        setError("Impossible de charger les cantiques. Veuillez réessayer.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCantiques()
+  }, [])
 
   const filteredHymns = useMemo(() => {
     return cantiques.filter(hymn => {
+      const lyricsArray = Array.isArray(hymn.lyrics) ? hymn.lyrics : []
       const matchesSearch = 
         hymn.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        hymn.lyrics.some(verse => verse.toLowerCase().includes(searchQuery.toLowerCase()))
+        lyricsArray.some((verse: string) => verse.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesCategory = selectedCategory === "Tous" || hymn.category === selectedCategory
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, selectedCategory])
+  }, [cantiques, searchQuery, selectedCategory])
 
   const goToNextHymn = () => {
     if (selectedIndex < filteredHymns.length - 1) {
@@ -60,7 +91,7 @@ export function HymnBook() {
     }
   }
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: string) => {
     setFavorites(prev => {
       const next = new Set(prev)
       if (next.has(id)) {
@@ -73,7 +104,9 @@ export function HymnBook() {
   }
 
   const copyLyrics = (hymn: Cantique) => {
-    const text = `${hymn.title}\n(${hymn.reference})\n\n${hymn.lyrics.join('\n\n')}${hymn.chorus ? '\n\nChoeur:\n' + hymn.chorus.join('\n') : ''}`
+    const lyricsArray = Array.isArray(hymn.lyrics) ? hymn.lyrics : []
+    const chorusArray = Array.isArray(hymn.chorus) ? hymn.chorus : []
+    const text = `${hymn.title}\n(${hymn.reference})\n\n${lyricsArray.join('\n\n')}${chorusArray.length > 0 ? '\n\nChoeur:\n' + chorusArray.join('\n') : ''}`
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -151,8 +184,25 @@ export function HymnBook() {
         </div>
       </div>
 
+      {/* Loading & Error States */}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+          <p className="text-muted-foreground">Chargement des cantiques...</p>
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div className="text-center py-20 bg-destructive/10 rounded-3xl border border-destructive/20">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+        </div>
+      )}
+
       {/* Hymns Grid/List */}
-      {viewMode === "grid" ? (
+      {!isLoading && !error && viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredHymns.map((hymn, index) => (
             <motion.div
@@ -179,7 +229,9 @@ export function HymnBook() {
               </h3>
               <p className="text-xs text-muted-foreground mb-3">{hymn.category}</p>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {hymn.lyrics[0].split('\n')[0]}...
+                {Array.isArray(hymn.lyrics) && hymn.lyrics.length > 0
+                  ? hymn.lyrics[0].split('\n')[0]
+                  : "Pas de paroles"}...
               </p>
               <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
                 <Button
@@ -218,7 +270,7 @@ export function HymnBook() {
               }}
             >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <span className="font-bold text-primary">{hymn.id}</span>
+                <span className="font-bold text-primary">{index + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
@@ -252,7 +304,7 @@ export function HymnBook() {
       )}
 
       {/* Empty State */}
-      {filteredHymns.length === 0 && (
+      {!isLoading && !error && filteredHymns.length === 0 && (
         <div className="text-center py-16">
           <Book className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -332,7 +384,7 @@ export function HymnBook() {
               </div>
 
               <div className="space-y-6">
-                {selectedHymn.lyrics.map((verse, index) => (
+                {(Array.isArray(selectedHymn.lyrics) ? selectedHymn.lyrics : []).map((verse: string, index: number) => (
                   <div key={index} className="space-y-2">
                     <span className="text-xs font-semibold text-primary uppercase tracking-wider">
                       {index === 0 ? "Couplet 1" : `Couplet ${index + 1}`}
@@ -343,12 +395,12 @@ export function HymnBook() {
                   </div>
                 ))}
 
-                {selectedHymn.chorus && (
+                {selectedHymn.chorus && Array.isArray(selectedHymn.chorus) && selectedHymn.chorus.length > 0 && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
                     <span className="text-xs font-semibold text-primary uppercase tracking-wider">
                       Choeur
                     </span>
-                    {selectedHymn.chorus.map((line, index) => (
+                    {selectedHymn.chorus.map((line: string, index: number) => (
                       <p key={index} className="text-foreground whitespace-pre-line leading-relaxed font-medium">
                         {line}
                       </p>
