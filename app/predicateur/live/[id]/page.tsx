@@ -20,11 +20,12 @@ export default function PredicateurLiveControl() {
   useEffect(() => {
     const fetchSermon = async () => {
       try {
-        const response = await fetch('/api/sermons')
+        const response = await fetch(`/api/sermons/${params.id}`)
         const data = await response.json()
-        const found = data.sermons?.find((s: any) => s.id === params.id)
-        if (found) {
-          setSermon(found)
+        if (data.sermon) {
+          setSermon(data.sermon)
+        } else {
+          toast.error("Message non trouvé")
         }
       } catch (error) {
         toast.error("Erreur lors du chargement du message")

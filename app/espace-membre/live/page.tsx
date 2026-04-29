@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { pusherClient } from "@/lib/pusher"
 
 export default function LiveMemberPage() {
   const [activeSlide, setActiveSlide] = useState<any>(null)
@@ -16,6 +17,7 @@ export default function LiveMemberPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowingLive, setIsFollowingLive] = useState(true)
   const [liveSlideId, setLiveSlideId] = useState<string | null>(null)
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
 
   const fetchActiveSlide = useCallback(async () => {
     try {
@@ -25,6 +27,7 @@ export default function LiveMemberPage() {
         setSlides(data.activeSession.slides || [])
         setSessionTitle(data.activeSession.sermonTitle)
         setLiveSlideId(data.activeSession.activeSlideId)
+        setActiveSessionId(data.activeSession.id)
 
         if (isFollowingLive) {
           const index = data.activeSession.slides.findIndex((s: any) => s.id === data.activeSession.activeSlideId)
@@ -38,6 +41,7 @@ export default function LiveMemberPage() {
         setSlides([])
         setSessionTitle("")
         setLiveSlideId(null)
+        setActiveSessionId(null)
       }
     } catch (error) {
       console.error("Failed to fetch active slide")
@@ -48,9 +52,69 @@ export default function LiveMemberPage() {
 
   useEffect(() => {
     fetchActiveSlide()
-    const interval = setInterval(fetchActiveSlide, 2000) // Poll every 2 seconds
-    return () => clearInterval(interval)
-  }, [fetchActiveSlide])
+
+    if (!pusherClient) return;
+
+    // Subscribe to global channel for session start/stop
+    const globalChannel = pusherClient.subscribe('live-sessions-global');
+    globalChannel.bind('session-status', (data: { isActive: boolean, sessionId: string }) => {
+      if (!data.isActive && data.sessionId === activeSessionId) {
+        setActiveSlide(null);
+        setSlides([]);
+        setSessionTitle("");
+        setLiveSlideId(null);
+        setActiveSessionId(null);
+      } else if (data.isActive) {
+        fetchActiveSlide();
+      }
+    });
+
+    // Keep polling as a fallback but less frequently
+    const interval = setInterval(fetchActiveSlide, 30000);
+
+    return () => {
+      pusherClient.unsubscribe('live-sessions-global');
+      clearInterval(interval);
+    }
+  }, [fetchActiveSlide, activeSessionId])
+
+  useEffect(() => {
+    if (!pusherClient || !activeSessionId) return;
+
+    // Subscribe to session-specific channel for slide updates
+    const sessionChannel = pusherClient.subscribe(`live-session-${activeSessionId}`);
+
+    sessionChannel.bind('slide-changed', (data: { activeSlideId: string, activeSlide: any, sermonTitle: string }) => {
+      setLiveSlideId(data.activeSlideId);
+      setSessionTitle(data.sermonTitle);
+
+      if (isFollowingLive) {
+        setActiveSlide(data.activeSlide);
+        // Ensure index is updated if we have the slides list
+        const index = slides.findIndex((s: any) => s.id === data.activeSlideId);
+        if (index !== -1) {
+          setCurrentIndex(index);
+        } else {
+          // If slide not in list, refetch to get updated list
+          fetchActiveSlide();
+        }
+      }
+    });
+
+    sessionChannel.bind('session-status', (data: { isActive: boolean }) => {
+      if (!data.isActive) {
+        setActiveSlide(null);
+        setSlides([]);
+        setSessionTitle("");
+        setLiveSlideId(null);
+        setActiveSessionId(null);
+      }
+    });
+
+    return () => {
+      pusherClient.unsubscribe(`live-session-${activeSessionId}`);
+    }
+  }, [activeSessionId, isFollowingLive, slides, fetchActiveSlide])
 
   const goToNext = () => {
     if (currentIndex < slides.length - 1) {
