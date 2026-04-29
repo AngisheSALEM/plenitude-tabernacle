@@ -33,6 +33,8 @@ export default function EspaceMembrePage() {
   const { isStandalone, installApp } = usePwa()
   const [allVideos, setAllVideos] = useState<any[]>([])
   const [allAudio, setAllAudio] = useState<any[]>([])
+  const [announcements, setAnnouncements] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -44,9 +46,10 @@ export default function EspaceMembrePage() {
       setIsLoading(true)
       try {
         setError(null)
-        const [videosRes, audioRes] = await Promise.all([
+        const [videosRes, audioRes, annoncesRes] = await Promise.all([
           fetch("/api/videos?limit=100"),
-          fetch("/api/audio?limit=100")
+          fetch("/api/audio?limit=100"),
+          fetch("/api/annonces")
         ])
 
         if (!videosRes.ok || !audioRes.ok) {
@@ -55,9 +58,30 @@ export default function EspaceMembrePage() {
 
         const videosData = await videosRes.json()
         const audioData = await audioRes.json()
+        const annoncesData = annoncesRes.ok ? await annoncesRes.json() : { announcements: [] }
 
         setAllVideos(videosData.videos || [])
         setAllAudio(audioData.audios || [])
+
+        const fetchedAnnonces = annoncesData.announcements || []
+        setAnnouncements(fetchedAnnonces)
+
+        // Gestion des notifications lues
+        const lastSeenStr = localStorage.getItem("lastSeenAnnonce")
+        if (fetchedAnnonces.length > 0) {
+          if (!lastSeenStr) {
+            setUnreadCount(fetchedAnnonces.length)
+            toast.info(`Bienvenue ! Vous avez ${fetchedAnnonces.length} nouvelles annonces.`)
+          } else {
+            const lastSeenDate = new Date(lastSeenStr).getTime()
+            const newAnnonces = fetchedAnnonces.filter((a: any) => new Date(a.createdAt).getTime() > lastSeenDate)
+            setUnreadCount(newAnnonces.length)
+            if (newAnnonces.length > 0) {
+              toast.info(`Vous avez ${newAnnonces.length} nouvelles annonces depuis votre dernière visite.`)
+            }
+          }
+        }
+
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err)
         setError("Impossible de charger les contenus. Veuillez réessayer plus tard.")
@@ -171,10 +195,57 @@ export default function EspaceMembrePage() {
                   Installer l'App
                 </Button>
               )}
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-              </Button>
+
+              <DropdownMenu onOpenChange={(open) => {
+                if (open) {
+                  setUnreadCount(0)
+                  if (announcements.length > 0) {
+                    localStorage.setItem("lastSeenAnnonce", announcements[0].createdAt)
+                  }
+                }
+              }}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 p-0">
+                  <DropdownMenuLabel className="p-4 border-b border-border">
+                    Annonces & Notifications
+                  </DropdownMenuLabel>
+                  <div className="max-h-96 overflow-y-auto">
+                    {announcements.length === 0 ? (
+                      <div className="p-8 text-center text-muted-foreground italic">
+                        Aucune annonce pour le moment.
+                      </div>
+                    ) : (
+                      announcements.slice(0, 5).map((annonce, i) => (
+                        <div key={annonce.id} className="p-4 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                              annonce.type === 'URGENT' ? 'bg-red-500/20 text-red-500' : 'bg-primary/20 text-primary'
+                            }`}>
+                              {annonce.type}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">{formatDate(annonce.createdAt)}</span>
+                          </div>
+                          <h4 className="text-sm font-semibold text-foreground mb-1">{annonce.title}</h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{annonce.content}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {announcements.length > 5 && (
+                    <DropdownMenuItem className="p-3 text-center justify-center text-xs text-primary font-medium cursor-pointer">
+                      Voir toutes les annonces
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
