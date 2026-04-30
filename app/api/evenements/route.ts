@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { title, content, isActive, date } = body
+    const { title, content, imageUrl, isActive, date } = body
 
     if (!title || !content) {
       return NextResponse.json(
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         content,
+        imageUrl,
         isActive: isActive ?? true,
         date: date ? new Date(date) : null,
       },

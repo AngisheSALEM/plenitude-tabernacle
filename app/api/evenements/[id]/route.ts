@@ -25,13 +25,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const body = await req.json()
-    const { title, content, isActive, date } = body
+    const { title, content, imageUrl, isActive, date } = body
 
     const evenement = await prisma.evenement.update({
       where: { id: params.id },
       data: {
         ...(title && { title }),
         ...(content && { content }),
+        ...(imageUrl !== undefined && { imageUrl }),
         ...(isActive !== undefined && { isActive }),
         ...(date !== undefined && { date: date ? new Date(date) : null }),
       },
