@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Church, Heart, Users, BookOpen } from "lucide-react"
+import Image from "next/image"
 
 const values = [
   {
@@ -50,13 +51,16 @@ export function AboutSection() {
             <div className="relative aspect-[3/4] max-w-md mx-auto lg:mx-0">
               {/* Image container with decorative elements */}
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/10 transform rotate-3" />
-              <div className="absolute inset-0 rounded-3xl bg-card border border-border overflow-hidden transform -rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
-                      <span className="font-serif text-5xl font-bold text-primary">JM</span>
-                    </div>
+              <div className="absolute inset-0 rounded-3xl bg-card border border-border overflow-hidden transform -rotate-3 hover:rotate-0 transition-transform duration-500 group">
+                <Image
+                  src="/image2.png"
+                  alt="Pasteur Joel Mugisho"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent z-10" />
+                <div className="absolute inset-0 flex items-end justify-center">
+                  <div className="text-center p-8 z-20">
                     <h3 className="font-serif text-2xl font-bold text-foreground">Pasteur Joel Mugisho Balagizi</h3>
                     <p className="text-muted-foreground mt-2">Pasteur Principal</p>
                   </div>

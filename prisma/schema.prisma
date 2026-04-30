@@ -137,6 +137,7 @@ model Evenement {
   id        String    @id @default(cuid())
   title     String
   content   String
+  imageUrl  String?
   isActive  Boolean   @default(true)
   date      DateTime?
   createdAt DateTime  @default(now())

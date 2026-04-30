@@ -3,6 +3,7 @@
 import { Play, Radio, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 export function HeroSection() {
   return (
@@ -121,7 +122,14 @@ export function HeroSection() {
             <div className="relative max-w-4xl mx-auto">
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
               <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 bg-card shadow-2xl shadow-primary/5">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/10" />
+                <Image
+                  src="/image1.png"
+                  alt="La Puissance de la Parole"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/10 mix-blend-overlay" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div 
                     className="p-6 rounded-full bg-primary/90 cursor-pointer transition-transform hover:scale-110"
