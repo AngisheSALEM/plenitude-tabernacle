@@ -1,5 +1,7 @@
 import withSerwistInit from "@serwist/next"
 
+process.env.SERWIST_SUPPRESS_TURBOPACK_WARNING = "1"
+
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",

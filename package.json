@@ -88,7 +88,14 @@
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma",
+      "sharp"
+    ]
   },
   "prisma": {
     "seed": "tsx prisma/seed-cantiques.ts"
