@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Save, Tv, Split, ArrowLeft, Trash2, Send } from "lucide-react"
+import { Save, Tv, Split, ArrowLeft, Trash2, Send, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,8 @@ export default function EditeurSermon() {
       if (data.slides) {
         setSlides(data.slides)
         toast.success(`${data.slides.length} slides générées avec succès !`)
+      } else {
+        throw new Error(data.error || "Erreur lors de la génération")
       }
     } catch (error) {
       toast.error("Erreur lors de la génération des slides.")
@@ -60,28 +62,42 @@ export default function EditeurSermon() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content, slides }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Erreur lors de l'enregistrement")
+      }
+
       const data = await response.json()
-      if (data.sermon) {
+      // Use data.sermon based on the API response structure
+      const sermon = data.sermon
+
+      if (sermon && sermon.id) {
         if (shareAfterSave) {
-          const shareRes = await fetch(`/api/sermons/${data.sermon.id}`, {
+          const shareRes = await fetch(`/api/sermons/${sermon.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isShared: true }),
           })
+
           if (shareRes.ok) {
             toast.success("Enregistré et envoyé à l'admin !")
             router.push('/predicateur')
           } else {
-            toast.success("Enregistré, mais erreur lors de l'envoi.")
-            router.push(`/predicateur/live/${data.sermon.id}`)
+            const shareError = await shareRes.json()
+            toast.error(shareError.error || "Enregistré, mais erreur lors de l'envoi.")
+            router.push(`/predicateur/live/${sermon.id}`)
           }
         } else {
           toast.success("Message enregistré avec succès !")
-          router.push(`/predicateur/live/${data.sermon.id}`)
+          router.push(`/predicateur/live/${sermon.id}`)
         }
+      } else {
+        throw new Error("Le serveur n'a pas renvoyé l'objet sermon attendu")
       }
-    } catch (error) {
-      toast.error("Erreur lors de l'enregistrement.")
+    } catch (error: any) {
+      console.error("Save error:", error)
+      toast.error(error.message || "Erreur lors de l'enregistrement.")
     } finally {
       setIsSaving(false)
       setIsSharing(false)
@@ -107,15 +123,15 @@ export default function EditeurSermon() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleGenerateSlides} disabled={isGenerating}>
-              <Split className="mr-2 h-4 w-4" />
+              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Split className="mr-2 h-4 w-4" />}
               Transformer en Slides
             </Button>
             <Button variant="outline" className="text-primary border-primary/20" onClick={() => handleSave(true)} disabled={isSharing || isSaving}>
-              <Send className="mr-2 h-4 w-4" />
+              {isSharing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Partager avec l&apos;Admin
             </Button>
             <Button className="bg-primary hover:bg-primary/90" onClick={() => handleSave(false)} disabled={isSaving || isSharing}>
-              <Save className="mr-2 h-4 w-4" />
+              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Enregistrer
             </Button>
           </div>
@@ -151,7 +167,16 @@ export default function EditeurSermon() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-xs font-mono text-muted-foreground">SLIDE {index + 1} - {slide.type}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
+                        onClick={() => {
+                          const newSlides = [...slides]
+                          newSlides.splice(index, 1)
+                          setSlides(newSlides)
+                        }}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
