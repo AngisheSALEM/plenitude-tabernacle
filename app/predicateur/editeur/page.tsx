@@ -12,9 +12,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 
-export default function EditeurSermon() {
+function EditeurSermonContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sermonId = searchParams.get("id")
@@ -215,5 +215,17 @@ export default function EditeurSermon() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function EditeurSermon() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <EditeurSermonContent />
+    </Suspense>
   )
 }
