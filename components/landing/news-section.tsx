@@ -117,6 +117,7 @@ export function NewsSection() {
                       <span>{announcement.location}</span>
                     </div>
                   )}
+                  </div>
 
                   <p className="text-muted-foreground leading-relaxed line-clamp-3 flex-1">
                     {announcement.content}
