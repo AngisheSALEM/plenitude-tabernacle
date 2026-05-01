@@ -4,9 +4,10 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const cantique = await prisma.cantique.findUnique({ where: { id: params.id } })
+    const { id } = await params;
+    const cantique = await prisma.cantique.findUnique({ where: { id } })
     if (!cantique) {
       return NextResponse.json({ error: "Cantique introuvable" }, { status: 404 })
     }
@@ -17,8 +18,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
@@ -28,7 +30,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { title, reference, category, lyrics, chorus } = body
 
     const cantique = await prisma.cantique.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(title && { title: title.toUpperCase() }),
         ...(reference && { reference }),
@@ -45,14 +47,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
-    await prisma.cantique.delete({ where: { id: params.id } })
+    await prisma.cantique.delete({ where: { id } })
     return NextResponse.json({ message: "Cantique supprimé" })
   } catch (error) {
     console.error("[CANTIQUE DELETE]", error)

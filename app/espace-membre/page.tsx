@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { HymnBook } from "@/components/cantiques/hymn-book"
 import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function EspaceMembrePage() {
   const { isAdmin } = useAuth()
