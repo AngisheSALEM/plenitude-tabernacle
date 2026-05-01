@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
+import { cn } from "@/lib/utils"
 
 export default function AdminDashboard() {
   const { data: session } = useSession()
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
     {
       title: "Total Videos",
       value: data?.stats?.videos || 0,
-      change: "+0",
+      change: data?.stats?.videosGrowth || "+0",
       changeLabel: "ce mois",
       icon: Video,
       color: "bg-blue-500/10 text-blue-500"
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
     {
       title: "Total Audio",
       value: data?.stats?.audio || 0,
-      change: "+0",
+      change: data?.stats?.audioGrowth || "+0",
       changeLabel: "ce mois",
       icon: Headphones,
       color: "bg-purple-500/10 text-purple-500"
@@ -59,7 +60,7 @@ export default function AdminDashboard() {
     {
       title: "Membres",
       value: data?.stats?.users || 0,
-      change: "+0",
+      change: data?.stats?.usersGrowth || "+0",
       changeLabel: "ce mois",
       icon: Users,
       color: "bg-green-500/10 text-green-500"
@@ -67,7 +68,7 @@ export default function AdminDashboard() {
     {
       title: "Vues totales",
       value: data?.stats?.views || 0,
-      change: "+0%",
+      change: data?.stats?.viewsGrowth || "+0%",
       changeLabel: "vs mois dernier",
       icon: Eye,
       color: "bg-primary/10 text-primary"
@@ -120,8 +121,11 @@ export default function AdminDashboard() {
                   <div className={`p-2.5 rounded-lg ${stat.color}`}>
                     <stat.icon className="h-5 w-5" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-500 text-sm">
-                    <TrendingUp className="h-3 w-3" />
+                  <div className={cn(
+                    "flex items-center gap-1 text-sm",
+                    stat.change.startsWith('-') ? "text-red-500" : "text-green-500"
+                  )}>
+                    <TrendingUp className={cn("h-3 w-3", stat.change.startsWith('-') && "rotate-180")} />
                     <span>{stat.change}</span>
                   </div>
                 </div>
@@ -262,7 +266,7 @@ export default function AdminDashboard() {
                 <p className="mt-3 text-sm font-medium text-foreground">Nouvel Audio</p>
               </div>
             </Link>
-            <Link href="/admin/annonces/nouveau">
+            <Link href="/admin/annonces">
               <div className="p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer text-center group">
                 <div className="w-12 h-12 mx-auto rounded-full bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <TrendingUp className="h-5 w-5 text-green-500" />

@@ -27,7 +27,9 @@ export async function GET(req: Request) {
       where: whereClause,
       orderBy: { updatedAt: 'desc' },
       include: {
-        slides: true,
+        slides: {
+          orderBy: { order: 'asc' }
+        },
         author: {
           select: {
             firstName: true,
@@ -39,6 +41,7 @@ export async function GET(req: Request) {
     });
     return NextResponse.json({ sermons });
   } catch (error) {
+    console.error("[SERMONS GET]", error);
     return NextResponse.json({ error: 'Failed to fetch sermons' }, { status: 500 });
   }
 }
@@ -52,16 +55,20 @@ export async function POST(req: Request) {
   try {
     const { title, content, slides } = await req.json();
 
+    if (!title) {
+        return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    }
+
     const sermon = await prisma.sermon.create({
       data: {
         title,
-        content,
+        content: content || "",
         authorId: session.user.id,
         slides: {
-          create: slides.map((s: any, index: number) => ({
+          create: (slides || []).map((s: any, index: number) => ({
             content: s.content,
-            type: s.type,
-            metadata: s.metadata,
+            type: s.type || "TEXT",
+            metadata: s.metadata || {},
             order: index,
           }))
         }
@@ -71,7 +78,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ sermon });
   } catch (error) {
-    console.error(error);
+    console.error("[SERMONS POST]", error);
     return NextResponse.json({ error: 'Failed to save sermon' }, { status: 500 });
   }
 }
