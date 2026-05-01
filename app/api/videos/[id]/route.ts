@@ -4,15 +4,16 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const video = await prisma.video.findUnique({ where: { id: params.id } })
+    const { id } = await params;
+    const video = await prisma.video.findUnique({ where: { id } })
     if (!video) {
       return NextResponse.json({ error: "Vidéo introuvable" }, { status: 404 })
     }
 
     await prisma.video.update({
-      where: { id: params.id },
+      where: { id },
       data: { views: { increment: 1 } },
     })
 
@@ -23,8 +24,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
@@ -34,7 +36,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { title, description, speaker, date, duration, thumbnail, youtubeUrl, isFeatured, category } = body
 
     const video = await prisma.video.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(title && { title }),
         ...(description !== undefined && { description }),
@@ -55,14 +57,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
-    await prisma.video.delete({ where: { id: params.id } })
+    await prisma.video.delete({ where: { id } })
     return NextResponse.json({ message: "Vidéo supprimée" })
   } catch (error) {
     console.error("[VIDEO DELETE]", error)

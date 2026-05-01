@@ -7,14 +7,15 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const sermon = await prisma.sermon.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         slides: {
           orderBy: { order: 'asc' }
@@ -45,8 +46,9 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'PREDICATEUR')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -57,7 +59,7 @@ export async function PATCH(
     const { isShared, title, content, slides } = body;
 
     const existingSermon = await prisma.sermon.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existingSermon) {
@@ -80,7 +82,7 @@ export async function PATCH(
         // Delete existing slides and recreate them for simplicity
         // In a more complex app, we might want to update individually
         await prisma.slide.deleteMany({
-            where: { sermonId: params.id }
+            where: { sermonId: id }
         });
 
         updateData.slides = {
@@ -94,7 +96,7 @@ export async function PATCH(
     }
 
     const sermon = await prisma.sermon.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: { slides: true }
     });
@@ -108,8 +110,9 @@ export async function PATCH(
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'PREDICATEUR')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -117,7 +120,7 @@ export async function DELETE(
 
     try {
       const existingSermon = await prisma.sermon.findUnique({
-        where: { id: params.id }
+        where: { id }
       });
 
       if (!existingSermon) {
@@ -129,7 +132,7 @@ export async function DELETE(
       }
 
       await prisma.sermon.delete({
-        where: { id: params.id }
+        where: { id }
       });
 
       return NextResponse.json({ success: true });

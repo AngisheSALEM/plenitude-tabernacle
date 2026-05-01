@@ -6,6 +6,7 @@ import { SessionProvider } from '@/components/session-provider'
 import { PwaProvider } from '@/components/pwa-provider'
 import { NetworkStatus } from '@/components/network-status'
 import { PwaInstallButton } from '@/components/pwa-install-button'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const inter = Inter({ 
@@ -75,6 +76,7 @@ export default function RootLayout({
             >
               <NetworkStatus />
               {children}
+              <Toaster position="top-center" richColors />
               <PwaInstallButton />
             </ThemeProvider>
           </PwaProvider>
