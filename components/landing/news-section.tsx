@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { Bell, Calendar, ArrowRight, Megaphone, Loader2 } from "lucide-react"
+import { Bell, Calendar, ArrowRight, Megaphone, Loader2, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 
 interface Announcement {
   id: string
@@ -13,6 +14,8 @@ interface Announcement {
   content: string
   imageUrl?: string
   isActive: boolean
+  date?: string
+  location?: string
   createdAt: string
 }
 
@@ -85,11 +88,17 @@ export function NewsSection() {
                 )}
                 
                 <div className="p-6 space-y-4 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(announcement.createdAt).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                    </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>
+                          {announcement.date
+                            ? new Date(announcement.date).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })
+                            : new Date(announcement.createdAt).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })
+                          }
+                        </span>
+                      </div>
                     {announcement.isActive && (
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
@@ -102,18 +111,27 @@ export function NewsSection() {
                     {announcement.title}
                   </h3>
 
+                  {announcement.location && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" />
+                      <span>{announcement.location}</span>
+                    </div>
+                  )}
+
                   <p className="text-muted-foreground leading-relaxed line-clamp-3 flex-1">
                     {announcement.content}
                   </p>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:text-primary hover:bg-primary/10 p-0 h-auto group/btn self-start"
-                  >
-                    En savoir plus
-                    <ArrowRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
+                  <Link href="/evenements" className="self-start">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary hover:text-primary hover:bg-primary/10 p-0 h-auto group/btn"
+                    >
+                      En savoir plus
+                      <ArrowRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
                 </div>
               </motion.article>
             ))}

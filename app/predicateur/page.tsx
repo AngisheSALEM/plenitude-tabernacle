@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Send } from "lucide-react"
+import { Send, Edit } from "lucide-react"
 
 export default function PredicateurDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -128,6 +128,12 @@ export default function PredicateurDashboard() {
                                     Partager
                                 </Button>
                             )}
+                            <Button variant="ghost" size="sm" asChild className="mr-1">
+                                <Link href={`/predicateur/editeur?id=${sermon.id}`}>
+                                    <Edit className="mr-1 h-3.5 w-3.5" />
+                                    Modifier
+                                </Link>
+                            </Button>
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href={`/predicateur/live/${sermon.id}`}>
                                     Gérer

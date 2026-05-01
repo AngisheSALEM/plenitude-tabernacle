@@ -49,7 +49,7 @@ export default function EspaceMembrePage() {
         const [videosRes, audioRes, annoncesRes] = await Promise.all([
           fetch("/api/videos?limit=100"),
           fetch("/api/audio?limit=100"),
-          fetch("/api/annonces")
+          fetch("/api/evenements?active=true&limit=20")
         ])
 
         if (!videosRes.ok || !audioRes.ok) {
@@ -58,12 +58,12 @@ export default function EspaceMembrePage() {
 
         const videosData = await videosRes.json()
         const audioData = await audioRes.json()
-        const annoncesData = annoncesRes.ok ? await annoncesRes.json() : { announcements: [] }
+        const annoncesData = annoncesRes.ok ? await annoncesRes.json() : { evenements: [] }
 
         setAllVideos(videosData.videos || [])
         setAllAudio(audioData.audios || [])
 
-        const fetchedAnnonces = annoncesData.announcements || []
+        const fetchedAnnonces = annoncesData.evenements || []
         setAnnouncements(fetchedAnnonces)
 
         // Gestion des notifications lues
@@ -225,22 +225,22 @@ export default function EspaceMembrePage() {
                       announcements.slice(0, 5).map((annonce, i) => (
                         <div key={annonce.id} className="p-4 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                              annonce.type === 'URGENT' ? 'bg-red-500/20 text-red-500' : 'bg-primary/20 text-primary'
-                            }`}>
-                              {annonce.type}
+                            <span className="text-[10px] text-muted-foreground">
+                              {annonce.date ? new Date(annonce.date).toLocaleString("fr-FR") : formatDate(annonce.createdAt)}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">{formatDate(annonce.createdAt)}</span>
                           </div>
                           <h4 className="text-sm font-semibold text-foreground mb-1">{annonce.title}</h4>
                           <p className="text-xs text-muted-foreground line-clamp-2">{annonce.content}</p>
+                          <Link href="/evenements" className="text-[10px] text-primary hover:underline mt-2 inline-block">
+                            En savoir plus
+                          </Link>
                         </div>
                       ))
                     )}
                   </div>
-                  {announcements.length > 5 && (
-                    <DropdownMenuItem className="p-3 text-center justify-center text-xs text-primary font-medium cursor-pointer">
-                      Voir toutes les annonces
+                  {announcements.length > 0 && (
+                    <DropdownMenuItem asChild className="p-3 text-center justify-center text-xs text-primary font-medium cursor-pointer">
+                      <Link href="/evenements">Voir toutes les annonces</Link>
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>

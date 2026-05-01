@@ -11,14 +11,37 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { useSearchParams } from "next/navigation"
+import { useEffect } from "react"
+
 export default function EditeurSermon() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const sermonId = searchParams.get("id")
+
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [slides, setSlides] = useState<any[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (sermonId) {
+      setIsLoading(true)
+      fetch(`/api/sermons/${sermonId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.sermon) {
+            setTitle(data.sermon.title)
+            setContent(data.sermon.content)
+            setSlides(data.sermon.slides || [])
+          }
+        })
+        .finally(() => setIsLoading(false))
+    }
+  }, [sermonId])
 
   const handleGenerateSlides = async () => {
     if (!content.trim()) {
@@ -57,8 +80,8 @@ export default function EditeurSermon() {
     else setIsSaving(true)
 
     try {
-      const response = await fetch('/api/sermons', {
-        method: 'POST',
+      const response = await fetch(sermonId ? `/api/sermons/${sermonId}` : '/api/sermons', {
+        method: sermonId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content, slides }),
       })
@@ -69,7 +92,6 @@ export default function EditeurSermon() {
       }
 
       const data = await response.json()
-      // Use data.sermon based on the API response structure
       const sermon = data.sermon
 
       if (sermon && sermon.id) {
@@ -90,7 +112,9 @@ export default function EditeurSermon() {
           }
         } else {
           toast.success("Message enregistré avec succès !")
-          router.push(`/predicateur/live/${sermon.id}`)
+          if (!sermonId) {
+            router.push(`/predicateur/live/${sermon.id}`)
+          }
         }
       } else {
         throw new Error("Le serveur n'a pas renvoyé l'objet sermon attendu")

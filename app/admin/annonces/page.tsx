@@ -13,7 +13,8 @@ import {
   Calendar,
   Upload,
   X,
-  Loader2
+  Loader2,
+  MapPin
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -46,6 +47,8 @@ interface Announcement {
   content: string
   imageUrl?: string
   isActive: boolean
+  date?: string
+  location?: string
   createdAt: string
 }
 
@@ -53,10 +56,13 @@ export default function AdminAnnoncesPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     content: "",
-    imageUrl: ""
+    imageUrl: "",
+    date: "",
+    location: ""
   })
 
   const fetchAnnouncements = () => {
@@ -82,20 +88,36 @@ export default function AdminAnnoncesPage() {
   const handleCreate = async () => {
     if (!newAnnouncement.title || !newAnnouncement.content) return
     try {
-      const res = await fetch("/api/evenements", {
-        method: "POST",
+      const url = editingId ? `/api/evenements/${editingId}` : "/api/evenements"
+      const method = editingId ? "PATCH" : "POST"
+
+      const res = await fetch(url, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAnnouncement),
       })
-      if (!res.ok) throw new Error("Erreur lors de la création")
+      if (!res.ok) throw new Error("Erreur lors de l'enregistrement")
 
-      setNewAnnouncement({ title: "", content: "", imageUrl: "" })
+      setNewAnnouncement({ title: "", content: "", imageUrl: "", date: "", location: "" })
       setIsDialogOpen(false)
+      setEditingId(null)
       fetchAnnouncements()
-      toast.success("Annonce créée avec succès")
+      toast.success(editingId ? "Annonce mise à jour" : "Annonce créée avec succès")
     } catch (error) {
-      toast.error("Erreur lors de la création de l'annonce")
+      toast.error("Erreur lors de l'enregistrement de l'annonce")
     }
+  }
+
+  const handleEdit = (announcement: Announcement) => {
+    setNewAnnouncement({
+      title: announcement.title,
+      content: announcement.content,
+      imageUrl: announcement.imageUrl || "",
+      date: announcement.date ? new Date(announcement.date).toISOString().slice(0, 16) : "",
+      location: announcement.location || ""
+    })
+    setEditingId(announcement.id)
+    setIsDialogOpen(true)
   }
 
   const handleDelete = async (id: string) => {
@@ -165,7 +187,7 @@ export default function AdminAnnoncesPage() {
                 L&apos;annonce sera visible sur la page d&apos;accueil.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
               <div className="space-y-2">
                 <Label htmlFor="title">Titre</Label>
                 <Input
@@ -185,6 +207,29 @@ export default function AdminAnnoncesPage() {
                   onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
                   className="bg-background border-border min-h-24"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date et Heure</Label>
+                  <Input
+                    id="date"
+                    type="datetime-local"
+                    value={newAnnouncement.date}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, date: e.target.value })}
+                    className="bg-background border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Lieu</Label>
+                  <Input
+                    id="location"
+                    placeholder="Ex: Temple"
+                    value={newAnnouncement.location}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, location: e.target.value })}
+                    className="bg-background border-border"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -331,9 +376,17 @@ export default function AdminAnnoncesPage() {
                   <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                     {announcement.content}
                   </p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>Créé le {new Date(announcement.createdAt).toLocaleDateString("fr-FR")}</span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>{announcement.date ? new Date(announcement.date).toLocaleString("fr-FR") : `Créé le ${new Date(announcement.createdAt).toLocaleDateString("fr-FR")}`}</span>
+                    </div>
+                    {announcement.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        <span>{announcement.location}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -344,7 +397,7 @@ export default function AdminAnnoncesPage() {
                     />
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(announcement)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
