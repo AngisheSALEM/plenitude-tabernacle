@@ -23,14 +23,39 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     const uploadDir = join(process.cwd(), "public", "uploads")
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
+
+    try {
+      if (!existsSync(uploadDir)) {
+        await mkdir(uploadDir, { recursive: true })
+      }
+    } catch (mkdirError: any) {
+      console.error("[UPLOAD MKDIR ERROR]", mkdirError)
+      return NextResponse.json(
+        {
+          error: "Impossible de créer le répertoire d'upload. Le système de fichiers peut être en lecture seule.",
+          details: mkdirError.message,
+          path: uploadDir
+        },
+        { status: 500 }
+      )
     }
 
     const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`
     const path = join(uploadDir, uniqueName)
 
-    await writeFile(path, buffer)
+    try {
+      await writeFile(path, buffer)
+    } catch (writeError: any) {
+      console.error("[UPLOAD WRITE ERROR]", writeError)
+      return NextResponse.json(
+        {
+          error: "Impossible d'écrire le fichier. Le système de fichiers peut être en lecture seule.",
+          details: writeError.message,
+          path: path
+        },
+        { status: 500 }
+      )
+    }
 
     const imageUrl = `/uploads/${uniqueName}`
 

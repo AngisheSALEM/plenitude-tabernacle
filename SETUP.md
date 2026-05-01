@@ -17,3 +17,15 @@ npx prisma migrate dev
 ```
 
 Une fois la migration terminée, l'erreur `Table 'public.users' does not exist` devrait disparaître.
+
+## Erreur de colonne manquante (ColumnNotFound)
+
+Si vous rencontrez une erreur indiquant qu'une colonne n'existe pas (par exemple `The column evenements.imageUrl does not exist`), cela signifie que votre base de données n'est pas à jour avec le schéma Prisma.
+
+Pour synchroniser votre base de données, assurez-vous d'abord que votre variable d'environnement `DATABASE_URL` est correctement configurée, puis exécutez :
+
+```bash
+npx prisma migrate deploy
+```
+
+Cela appliquera toutes les migrations manquantes, y compris celle ajoutant la colonne `imageUrl` à la table `evenements`.
