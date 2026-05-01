@@ -46,14 +46,14 @@ export async function GET() {
     ]);
 
     const calculateGrowth = (current: number, previous: number) => {
-      if (previous === 0) return current > 0 ? \`+\${current}\` : "0";
+      if (previous === 0) return current > 0 ? `+${current}` : "0";
       const diff = ((current - previous) / previous) * 100;
-      return diff >= 0 ? \`+\${diff.toFixed(1)}%\` : \`\${diff.toFixed(1)}%\`;
+      return diff >= 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
     };
 
     const calculateAbsoluteGrowth = (current: number, previous: number) => {
       const diff = current - previous;
-      return diff >= 0 ? \`+\${diff}\` : \`\${diff}\`;
+      return diff >= 0 ? `+${diff}` : `${diff}`;
     };
 
     const recentContent = await prisma.video.findMany({
