@@ -140,6 +140,7 @@ model Evenement {
   imageUrl  String?
   isActive  Boolean   @default(true)
   date      DateTime?
+  location  String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
