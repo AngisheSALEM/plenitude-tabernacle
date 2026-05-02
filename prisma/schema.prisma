@@ -199,6 +199,24 @@ model FavoriteVideo {
   @@map("favorite_videos")
 }
 
+model Setting {
+  id          String   @id @default("singleton")
+  churchName  String   @default("Plénitude Tabernacle")
+  description String   @db.Text
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  facebook    String?
+  youtube     String?
+  instagram   String?
+  twitter     String?
+  schedule    Json?    // Array of { day, time, title }
+  updatedAt   DateTime @updatedAt
+
+  @@map("settings")
+}
+
 model FavoriteAudio {
   id      String @id @default(cuid())
   userId  String

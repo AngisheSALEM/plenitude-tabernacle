@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { 
   Settings, 
   Church,
@@ -12,7 +12,8 @@ import {
   Save,
   Facebook,
   Youtube,
-  RefreshCw
+  RefreshCw,
+  X
 } from "lucide-react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -24,8 +25,9 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function AdminSettingsPage() {
+  const [isLoading, setIsLoading] = useState(true)
   const [churchInfo, setChurchInfo] = useState({
-    name: "Plenitude Tabernacle",
+    churchName: "Plenitude Tabernacle",
     description: "Une eglise vivante au coeur de Kinshasa, engagee dans la proclamation de l&apos;Evangile et le service de la communaute.",
     address: "03 Av. Mafuta, Q. Mfinda, Ngaliema, Kinshasa, RDC",
     phone: "+243 999 123 456",
@@ -33,12 +35,11 @@ export default function AdminSettingsPage() {
     website: "www.plenitude-tabernacle.cd"
   })
 
-  const [schedule, setSchedule] = useState({
-    sundayMorning: "09:00",
-    sundayEvening: "17:00",
-    wednesday: "18:00",
-    friday: "18:00"
-  })
+  const [schedule, setSchedule] = useState<any[]>([
+    { day: "Dimanche", time: "09:00", title: "Culte principal" },
+    { day: "Mercredi", time: "18:00", title: "Etude biblique" },
+    { day: "Vendredi", time: "18:00", title: "Nuit de priere" }
+  ])
 
   const [social, setSocial] = useState({
     facebook: "https://facebook.com/plenitudetabernacle",
@@ -46,6 +47,58 @@ export default function AdminSettingsPage() {
     instagram: "",
     twitter: ""
   })
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings")
+        const data = await res.json()
+        if (data && !data.error) {
+          setChurchInfo({
+            churchName: data.churchName,
+            description: data.description,
+            address: data.address,
+            phone: data.phone,
+            email: data.email,
+            website: data.website
+          })
+          if (data.schedule) setSchedule(data.schedule)
+          setSocial({
+            facebook: data.facebook || "",
+            youtube: data.youtube || "",
+            instagram: data.instagram || "",
+            twitter: data.twitter || ""
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...churchInfo,
+          ...social,
+          schedule
+        })
+      })
+      if (res.ok) {
+        toast.success("Paramètres enregistrés avec succès")
+      } else {
+        toast.error("Erreur lors de l'enregistrement")
+      }
+    } catch (error) {
+      toast.error("Erreur réseau")
+    }
+  }
 
   const [youtubeSync, setYoutubeSync] = useState({
     playlistId: "PLPNLjERB0V6CQLtDMHkck2JhHCG9JXusa",
@@ -116,8 +169,8 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="name">Nom de l&apos;eglise</Label>
                 <Input
                   id="name"
-                  value={churchInfo.name}
-                  onChange={(e) => setChurchInfo({ ...churchInfo, name: e.target.value })}
+                  value={churchInfo.churchName}
+                  onChange={(e) => setChurchInfo({ ...churchInfo, churchName: e.target.value })}
                   className="bg-background border-border"
                 />
               </div>
@@ -188,7 +241,10 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={handleSave}
+          >
             <Save className="mr-2 h-4 w-4" />
             Enregistrer les modifications
           </Button>
@@ -206,55 +262,76 @@ export default function AdminSettingsPage() {
                 Definissez les horaires des differents services.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sundayMorning">Culte du Dimanche matin</Label>
-                  <Input
-                    id="sundayMorning"
-                    type="time"
-                    value={schedule.sundayMorning}
-                    onChange={(e) => setSchedule({ ...schedule, sundayMorning: e.target.value })}
-                    className="bg-background border-border"
-                  />
+            <CardContent className="space-y-6">
+              {schedule.map((item, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end border-b border-border pb-4 last:border-0 last:pb-0">
+                  <div className="space-y-2">
+                    <Label>Jour</Label>
+                    <Input
+                      value={item.day}
+                      onChange={(e) => {
+                        const newSchedule = [...schedule]
+                        newSchedule[index].day = e.target.value
+                        setSchedule(newSchedule)
+                      }}
+                      className="bg-background border-border"
+                      placeholder="Ex: Dimanche"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Heure / Horaire</Label>
+                    <Input
+                      value={item.time}
+                      onChange={(e) => {
+                        const newSchedule = [...schedule]
+                        newSchedule[index].time = e.target.value
+                        setSchedule(newSchedule)
+                      }}
+                      className="bg-background border-border"
+                      placeholder="Ex: 09:00 - 12:00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Intitulé du culte</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={item.title}
+                        onChange={(e) => {
+                          const newSchedule = [...schedule]
+                          newSchedule[index].title = e.target.value
+                          setSchedule(newSchedule)
+                        }}
+                        className="bg-background border-border flex-1"
+                        placeholder="Ex: Culte principal"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => {
+                          setSchedule(schedule.filter((_, i) => i !== index))
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sundayEvening">Culte du Dimanche soir</Label>
-                  <Input
-                    id="sundayEvening"
-                    type="time"
-                    value={schedule.sundayEvening}
-                    onChange={(e) => setSchedule({ ...schedule, sundayEvening: e.target.value })}
-                    className="bg-background border-border"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="wednesday">Etude biblique (Mercredi)</Label>
-                  <Input
-                    id="wednesday"
-                    type="time"
-                    value={schedule.wednesday}
-                    onChange={(e) => setSchedule({ ...schedule, wednesday: e.target.value })}
-                    className="bg-background border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="friday">Priere (Vendredi)</Label>
-                  <Input
-                    id="friday"
-                    type="time"
-                    value={schedule.friday}
-                    onChange={(e) => setSchedule({ ...schedule, friday: e.target.value })}
-                    className="bg-background border-border"
-                  />
-                </div>
-              </div>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full border-dashed"
+                onClick={() => setSchedule([...schedule, { day: "", time: "", title: "" }])}
+              >
+                + Ajouter un horaire
+              </Button>
             </CardContent>
           </Card>
 
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={handleSave}
+          >
             <Save className="mr-2 h-4 w-4" />
             Enregistrer les horaires
           </Button>
@@ -356,7 +433,10 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={handleSave}
+          >
             <Save className="mr-2 h-4 w-4" />
             Enregistrer les liens
           </Button>

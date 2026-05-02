@@ -5,6 +5,7 @@ import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { LogIn, Play, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function CTASection() {
   const ref = useRef(null)
@@ -74,21 +75,25 @@ export function CTASection() {
             transition={{ delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button 
-              size="lg" 
-              className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/25"
-            >
-              <LogIn className="mr-2 h-5 w-5" />
-              Se Connecter avec Google
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="group border-border/50 hover:border-primary/50 px-8 py-6 text-lg rounded-full transition-all duration-300 hover:bg-primary/5"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Découvrir les extraits
-            </Button>
+            <Link href="/connexion">
+              <Button
+                size="lg"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/25"
+              >
+                <LogIn className="mr-2 h-5 w-5" />
+                Se Connecter avec Google
+              </Button>
+            </Link>
+            <Link href="/connexion">
+              <Button
+                size="lg"
+                variant="outline"
+                className="group border-border/50 hover:border-primary/50 px-8 py-6 text-lg rounded-full transition-all duration-300 hover:bg-primary/5"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Découvrir les extraits
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Trust indicators */}
@@ -109,10 +114,10 @@ export function CTASection() {
                   </div>
                 ))}
               </div>
-              <span className="text-sm">500+ membres actifs</span>
+              <span className="text-sm">Membres actifs</span>
             </div>
             <div className="h-4 w-px bg-border hidden sm:block" />
-            <span className="text-sm">200+ prédications disponibles</span>
+            <span className="text-sm">Prédications disponibles</span>
             <div className="h-4 w-px bg-border hidden sm:block" />
             <span className="text-sm">100% gratuit</span>
           </motion.div>

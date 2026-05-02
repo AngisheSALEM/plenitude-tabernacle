@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { Facebook, Youtube, Instagram, Heart } from "lucide-react"
+import { Facebook, Youtube, Instagram, Heart, Twitter } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const footerLinks = {
   navigation: [
@@ -25,6 +26,24 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) setSettings(data)
+      })
+      .catch(console.error)
+  }, [])
+
+  const socialLinks = [
+    { icon: Facebook, href: settings?.facebook || "#", label: "Facebook" },
+    { icon: Youtube, href: settings?.youtube || "#", label: "YouTube" },
+    { icon: Instagram, href: settings?.instagram || "#", label: "Instagram" },
+    ...(settings?.twitter ? [{ icon: Twitter, href: settings.twitter, label: "Twitter" }] : []),
+  ]
+
   return (
     <footer className="relative bg-card border-t border-border">
       <div className="container mx-auto px-4 py-16">
@@ -36,13 +55,12 @@ export function Footer() {
                 <span className="font-serif text-2xl font-bold text-primary">P</span>
               </div>
               <div>
-                <span className="font-serif text-xl font-bold text-foreground">Plénitude Tabernacle</span>
+                <span className="font-serif text-xl font-bold text-foreground">{settings?.churchName || "Plénitude Tabernacle"}</span>
                 <span className="block text-sm text-muted-foreground">Église de Kinshasa</span>
               </div>
             </Link>
             <p className="text-muted-foreground max-w-md leading-relaxed">
-              Une communauté de foi dédiée à l&apos;enseignement de la Parole de Dieu et 
-              à l&apos;édification des vies. Rejoignez-nous pour découvrir votre plein potentiel en Christ.
+              {settings?.description || "Une communauté de foi dédiée à l'enseignement de la Parole de Dieu et à l'édification des vies. Rejoignez-nous pour découvrir votre plein potentiel en Christ."}
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-3">
