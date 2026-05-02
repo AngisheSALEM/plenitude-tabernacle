@@ -5,6 +5,7 @@ import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Church, Heart, Users, BookOpen } from "lucide-react"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 const values = [
   {
@@ -32,6 +33,16 @@ const values = [
 export function AboutSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) setSettings(data)
+      })
+      .catch(console.error)
+  }, [])
 
   return (
     <section id="a-propos" className="relative py-32 overflow-hidden" ref={ref}>
@@ -67,16 +78,6 @@ export function AboutSection() {
                 </div>
               </div>
               
-              {/* Floating badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.5 }}
-                className="absolute -bottom-6 -right-6 lg:right-auto lg:-left-6 bg-primary text-primary-foreground p-6 rounded-2xl shadow-xl shadow-primary/20"
-              >
-                <p className="font-serif text-3xl font-bold">15+</p>
-                <p className="text-sm opacity-90">Années de ministère</p>
-              </motion.div>
             </div>
           </motion.div>
 
@@ -97,12 +98,10 @@ export function AboutSection() {
                 L&apos;Identite de l&apos;Epouse
               </motion.p>
               <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-                Plenitude Tabernacle
+                {settings?.churchName || "Plenitude Tabernacle"}
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed text-pretty">
-                Plenitude Tabernacle est une assemblee de croyants devoues au Message du Temps 
-                de la Fin, tel que restitue par le ministere prophetique de William Marion Branham, 
-                le messager d&apos;Apocalypse 10:7 et de Malachie 4:5-6.
+                {settings?.description || "Plenitude Tabernacle est une assemblee de croyants devoues au Message du Temps de la Fin, tel que restitue par le ministere prophetique de William Marion Branham, le messager d'Apocalypse 10:7 et de Malachie 4:5-6."}
               </p>
               <p className="text-lg text-muted-foreground leading-relaxed mt-4 text-pretty">
                 Notre eglise n&apos;est pas une denomination, mais un lieu de rassemblement pour ceux 

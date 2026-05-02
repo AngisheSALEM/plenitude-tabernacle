@@ -8,7 +8,8 @@ import {
   Calendar, Clock, Search, Filter, Grid, List,
   Heart, Share2, CheckCircle, ArrowRight, User,
   ChevronDown, X, LogOut, Settings, Bell, Book, Music,
-  Tv, Smartphone, Shield, Mic, ChevronLeft, ChevronRight
+  Tv, Smartphone, Shield, Mic, ChevronLeft, ChevronRight,
+  Phone, Mail
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { usePwa } from "@/components/pwa-provider"
@@ -37,6 +38,7 @@ export default function EspaceMembrePage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [settings, setSettings] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("videos")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedVideo, setSelectedVideo] = useState<any | null>(null)
@@ -47,10 +49,11 @@ export default function EspaceMembrePage() {
       setIsLoading(true)
       try {
         setError(null)
-        const [videosRes, audioRes, annoncesRes] = await Promise.all([
+        const [videosRes, audioRes, annoncesRes, settingsRes] = await Promise.all([
           fetch("/api/videos?limit=100"),
           fetch("/api/audio?limit=100"),
-          fetch("/api/evenements?active=true&limit=20")
+          fetch("/api/evenements?active=true&limit=20"),
+          fetch("/api/settings")
         ])
 
         if (!videosRes.ok || !audioRes.ok) {
@@ -60,9 +63,11 @@ export default function EspaceMembrePage() {
         const videosData = await videosRes.json()
         const audioData = await audioRes.json()
         const annoncesData = annoncesRes.ok ? await annoncesRes.json() : { evenements: [] }
+        const settingsData = await settingsRes.json()
 
         setAllVideos(videosData.videos || [])
         setAllAudio(audioData.audios || [])
+        if (settingsData && !settingsData.error) setSettings(settingsData)
 
         const fetchedAnnonces = annoncesData.evenements || []
         setAnnouncements(fetchedAnnonces)
@@ -99,6 +104,56 @@ export default function EspaceMembrePage() {
   const [showDownloaded, setShowDownloaded] = useState(false)
   const [playingAudio, setPlayingAudio] = useState<string | null>(null)
   const [downloadingItems, setDownloadingItems] = useState<Set<string>>(new Set())
+  const [favorites, setFavorites] = useState<{ videos: any[], audios: any[], cantiques: any[] }>({
+    videos: [],
+    audios: [],
+    cantiques: []
+  })
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const res = await fetch("/api/favoris")
+        const data = await res.json()
+        if (data && !data.error) {
+          setFavorites({
+            videos: data.favoriteVideos?.map((f: any) => f.video) || [],
+            audios: data.favoriteAudios?.map((f: any) => f.audio) || [],
+            cantiques: data.favoriteCantiques?.map((f: any) => f.cantique) || []
+          })
+        }
+      } catch (err) {
+        console.error("Error fetching favorites:", err)
+      }
+    }
+    if (session?.user) fetchFavorites()
+  }, [session])
+
+  const handleToggleFavorite = async (type: "video" | "audio" | "cantique", itemId: string) => {
+    const isFavorite = favorites[`${type}s` as keyof typeof favorites].some((f: any) => f.id === itemId)
+
+    try {
+      const res = await fetch("/api/favoris", {
+        method: isFavorite ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, itemId })
+      })
+
+      if (res.ok) {
+        toast.success(isFavorite ? "Retiré des favoris" : "Ajouté aux favoris")
+        // Refresh favorites
+        const updatedRes = await fetch("/api/favoris")
+        const updatedData = await updatedRes.json()
+        setFavorites({
+          videos: updatedData.favoriteVideos?.map((f: any) => f.video) || [],
+          audios: updatedData.favoriteAudios?.map((f: any) => f.audio) || [],
+          cantiques: updatedData.favoriteCantiques?.map((f: any) => f.cantique) || []
+        })
+      }
+    } catch (err) {
+      toast.error("Erreur lors de la mise à jour des favoris")
+    }
+  }
 
   const filteredVideos = allVideos
     .filter(video => 
@@ -241,7 +296,7 @@ export default function EspaceMembrePage() {
                   </div>
                   {announcements.length > 0 && (
                     <DropdownMenuItem asChild className="p-3 text-center justify-center text-xs text-primary font-medium cursor-pointer">
-                      <Link href="/evenements">Voir toutes les annonces</Link>
+                      <Link href="/espace-membre/annonces">Voir toutes les annonces</Link>
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -344,8 +399,8 @@ export default function EspaceMembrePage() {
                   Cantiques
                 </TabsTrigger>
                 <TabsTrigger value="downloads" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <Download className="mr-2 h-4 w-4" />
-                  Telecharges
+                  <Heart className="mr-2 h-4 w-4" />
+                  Favoris
                 </TabsTrigger>
                 <TabsTrigger value="live" className="rounded-full px-6 data-[state=active]:bg-red-600 data-[state=active]:text-white relative">
                   <Tv className="mr-2 h-4 w-4" />
@@ -588,23 +643,17 @@ export default function EspaceMembrePage() {
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-                              <Heart className="h-4 w-4" />
-                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleDownload("audio", audio.id)
+                                handleToggleFavorite("audio", audio.id)
                               }}
-                              disabled={downloadingItems.has(`audio-${audio.id}`) || audio.downloaded}
                             >
-                              {downloadingItems.has(`audio-${audio.id}`) ? (
-                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                <Download className="h-4 w-4" />
-                              )}
+                              <Heart
+                                className={`h-4 w-4 ${favorites.audios.some(f => f.id === audio.id) ? "fill-primary text-primary" : ""}`}
+                              />
                             </Button>
                           </div>
                         </div>
@@ -627,13 +676,63 @@ export default function EspaceMembrePage() {
             <HymnBook />
           </TabsContent>
 
-          {/* Downloads Tab */}
+          {/* Favorites Tab */}
           <TabsContent value="downloads" className="space-y-8">
-            <div className="text-center py-20 bg-secondary/30 rounded-3xl border border-dashed border-border">
-              <Download className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-              <h3 className="text-lg font-medium text-foreground mb-1">Espace de téléchargement</h3>
-              <p className="text-muted-foreground">Vos contenus téléchargés apparaîtront ici pour une écoute hors-ligne.</p>
-            </div>
+            {favorites.videos.length === 0 && favorites.audios.length === 0 ? (
+              <div className="text-center py-20 bg-secondary/30 rounded-3xl border border-dashed border-border">
+                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+                <h3 className="text-lg font-medium text-foreground mb-1">Vos favoris</h3>
+                <p className="text-muted-foreground">Retrouvez ici vos prédications et chants préférés.</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {favorites.videos.length > 0 && (
+                  <section>
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <Video className="h-5 w-5 text-primary" />
+                      Vidéos favorites
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {favorites.videos.map(video => (
+                        <div key={video.id} className="bg-card border border-border rounded-xl overflow-hidden cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                          <div className="aspect-video relative">
+                            <img src={getThumbnail(video)} alt={video.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <Play className="h-10 w-10 text-white" />
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <h4 className="font-medium text-sm truncate">{video.title}</h4>
+                            <p className="text-xs text-muted-foreground">{video.speaker}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+                {favorites.audios.length > 0 && (
+                  <section>
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <Headphones className="h-5 w-5 text-primary" />
+                      Audios favoris
+                    </h3>
+                    <div className="space-y-2">
+                      {favorites.audios.map(audio => (
+                        <div key={audio.id} className="flex items-center gap-4 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all cursor-pointer" onClick={() => setPlayingAudio(audio.id)}>
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            {playingAudio === audio.id ? <Pause className="h-4 w-4 text-primary" /> : <Play className="h-4 w-4 text-primary ml-0.5" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium truncate">{audio.title}</h4>
+                            <p className="text-xs text-muted-foreground">{audio.speaker}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Live Tab */}
@@ -691,10 +790,28 @@ export default function EspaceMembrePage() {
                     <div>
                       <h3 className="font-medium text-foreground">Adresse</h3>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        03 Av. Mafuta, Q. Mfinda<br />
-                        Commune de Ngaliema<br />
-                        Kinshasa, RD Congo
+                        {settings?.address || "03 Av. Mafuta, Q. Mfinda, Commune de Ngaliema, Kinshasa, RD Congo"}
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-6 pt-6 border-t border-border">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground text-sm">Téléphone</h3>
+                      <p className="text-muted-foreground text-sm">{settings?.phone || "+243 999 123 456"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground text-sm">Email</h3>
+                      <p className="text-muted-foreground text-sm">{settings?.email || "contact@plenitude-tabernacle.cd"}</p>
                     </div>
                   </div>
                 </div>
@@ -705,18 +822,18 @@ export default function EspaceMembrePage() {
                     Horaires des cultes
                   </h3>
                   <div className="space-y-3">
-                    {[
-                      { day: "Dimanche", time: "09h00 - 12h00", type: "Culte principal" },
-                      { day: "Mercredi", time: "18h00 - 20h00", type: "Etude biblique" },
-                      { day: "Vendredi", time: "18h00 - 21h00", type: "Nuit de priere" },
-                    ].map((schedule, i) => (
+                    {(settings?.schedule || [
+                      { day: "Dimanche", time: "09h00 - 12h00", title: "Culte principal" },
+                      { day: "Mercredi", time: "18h00 - 20h00", title: "Etude biblique" },
+                      { day: "Vendredi", time: "18h00 - 21h00", title: "Nuit de priere" },
+                    ]).map((item: any, i: number) => (
                       <div key={i} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                         <div>
-                          <p className="text-sm font-medium text-foreground">{schedule.day}</p>
-                          <p className="text-[11px] text-muted-foreground">{schedule.type}</p>
+                          <p className="text-sm font-medium text-foreground">{item.day}</p>
+                          <p className="text-[11px] text-muted-foreground">{item.title}</p>
                         </div>
                         <span className="px-3 py-1 bg-primary/10 text-primary text-[11px] rounded-full font-bold">
-                          {schedule.time}
+                          {item.time}
                         </span>
                       </div>
                     ))}
@@ -805,9 +922,12 @@ export default function EspaceMembrePage() {
                   >
                     <ChevronRight className="h-5 w-5" />
                   </Button>
-                  <Button className="rounded-full px-6 bg-primary hover:bg-primary/90">
-                    <Download className="mr-2 h-4 w-4" />
-                    Télécharger
+                  <Button
+                    className={`rounded-full px-6 ${favorites.videos.some(f => f.id === selectedVideo.id) ? "bg-secondary text-secondary-foreground" : "bg-primary hover:bg-primary/90"}`}
+                    onClick={() => handleToggleFavorite("video", selectedVideo.id)}
+                  >
+                    <Heart className={`mr-2 h-4 w-4 ${favorites.videos.some(f => f.id === selectedVideo.id) ? "fill-primary text-primary" : ""}`} />
+                    {favorites.videos.some(f => f.id === selectedVideo.id) ? "Favori" : "Mettre en favori"}
                   </Button>
                 </div>
               </div>

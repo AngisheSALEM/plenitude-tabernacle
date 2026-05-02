@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, Book, Music, ChevronRight, X, 
   Grid, List, BookOpen, Heart, Share2, Copy,
   ChevronDown, Filter, ChevronLeft
 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cantiques, categories, type Cantique } from "@/lib/cantiques-data"
@@ -33,6 +35,20 @@ export function HymnBook() {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [copied, setCopied] = useState(false)
+  const { data: session } = useSession()
+
+  useEffect(() => {
+    if (session) {
+      fetch("/api/favoris?type=cantiques")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.favoriteCantiques) {
+            setFavorites(new Set(data.favoriteCantiques.map((f: any) => f.cantiqueId)))
+          }
+        })
+        .catch(console.error)
+    }
+  }, [session])
 
   const filteredHymns = useMemo(() => {
     return cantiques.filter(hymn => {
@@ -60,16 +76,33 @@ export function HymnBook() {
     }
   }
 
-  const toggleFavorite = (id: number) => {
-    setFavorites(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
+  const toggleFavorite = async (id: number) => {
+    if (!session) {
+      toast.error("Veuillez vous connecter pour ajouter des favoris")
+      return
+    }
+
+    const isFavorite = favorites.has(id)
+
+    try {
+      const res = await fetch("/api/favoris", {
+        method: isFavorite ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "cantique", itemId: id.toString() })
+      })
+
+      if (res.ok) {
+        setFavorites(prev => {
+          const next = new Set(prev)
+          if (isFavorite) next.delete(id)
+          else next.add(id)
+          return next
+        })
+        toast.success(isFavorite ? "Retiré des favoris" : "Ajouté aux favoris")
       }
-      return next
-    })
+    } catch (err) {
+      toast.error("Erreur lors de la mise à jour des favoris")
+    }
   }
 
   const copyLyrics = (hymn: Cantique) => {

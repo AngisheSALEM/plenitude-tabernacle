@@ -140,7 +140,7 @@ export default function InscriptionPage() {
               Creer un compte
             </h1>
             <p className="text-muted-foreground">
-              Rejoignez des milliers de membres et accedez a tous nos contenus.
+              Rejoignez notre communaute et accedez a tous nos contenus.
             </p>
           </div>
 

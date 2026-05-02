@@ -2,18 +2,30 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useEffect, useState } from "react"
 import { MapPin, Clock, Phone, Mail, Calendar } from "lucide-react"
 
-const schedule = [
-  { day: "Mardi", time: "17h30 - 19h30", event: "Culte" },
-  { day: "Vendredi", time: "17h30 - 19h30", event: "Culte" },
-  { day: "Dimanche", time: "09h00 - 11h30", event: "Culte Principal" },
+const defaultSchedule = [
+  { day: "Mardi", time: "17h30 - 19h30", title: "Culte" },
+  { day: "Vendredi", time: "17h30 - 19h30", title: "Culte" },
+  { day: "Dimanche", time: "09h00 - 11h30", title: "Culte Principal" },
 ]
 
 export function LocationSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) setSettings(data)
+      })
+      .catch(console.error)
+  }, [])
+
+  const schedule = settings?.schedule || defaultSchedule
 
   return (
     <section id="localisation" className="relative py-32 overflow-hidden" ref={ref}>
@@ -69,11 +81,9 @@ export function LocationSection() {
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">Plénitude Tabernacle</h4>
+                  <h4 className="font-semibold text-foreground">{settings?.churchName || "Plénitude Tabernacle"}</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    03 Av. Mafuta, Q. Mfinda
-                    <br />
-                    Commune de Ngaliema, Kinshasa
+                    {settings?.address || "03 Av. Mafuta, Q. Mfinda, Commune de Ngaliema, Kinshasa"}
                   </p>
                 </div>
               </div>
@@ -106,7 +116,7 @@ export function LocationSection() {
                   >
                     <div>
                       <p className="font-medium text-foreground">{item.day}</p>
-                      <p className="text-sm text-muted-foreground">{item.event}</p>
+                      <p className="text-sm text-muted-foreground">{item.title}</p>
                     </div>
                     <div className="flex items-center gap-2 text-primary">
                       <Clock className="h-4 w-4" />
@@ -127,7 +137,7 @@ export function LocationSection() {
               >
                 <Phone className="h-5 w-5 text-primary mb-3" />
                 <p className="text-sm text-muted-foreground">Téléphone</p>
-                <p className="font-medium text-foreground">+243 XXX XXX XXX</p>
+                <p className="font-medium text-foreground">{settings?.phone || "+243 XXX XXX XXX"}</p>
               </motion.div>
               
               <motion.div
@@ -138,7 +148,7 @@ export function LocationSection() {
               >
                 <Mail className="h-5 w-5 text-primary mb-3" />
                 <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium text-foreground">contact@plenitude.cd</p>
+                <p className="font-medium text-foreground truncate">{settings?.email || "contact@plenitude.cd"}</p>
               </motion.div>
             </div>
           </motion.div>

@@ -217,24 +217,9 @@ export default function ConnexionPage() {
               Rejoignez notre communaute spirituelle
             </h2>
             <p className="text-lg text-muted-foreground max-w-md text-pretty">
-              Accedez a des centaines de predications, enseignements audio, et connectez-vous avec des milliers de membres.
+              Accedez a nos predications, enseignements audio, et connectez-vous avec notre communaute.
             </p>
 
-            {/* Stats */}
-            <div className="mt-12 grid grid-cols-3 gap-8">
-              <div>
-                <div className="text-3xl font-bold text-primary">500+</div>
-                <div className="text-sm text-muted-foreground">Predications</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary">200+</div>
-                <div className="text-sm text-muted-foreground">Audio</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary">5K+</div>
-                <div className="text-sm text-muted-foreground">Membres</div>
-              </div>
-            </div>
           </motion.div>
         </div>
       </div>

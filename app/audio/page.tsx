@@ -18,8 +18,11 @@ import {
   Shuffle,
   List,
   X,
-  Music
+  Music,
+  Heart
 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -66,8 +69,23 @@ export default function AudioPage() {
   const [isRepeating, setIsRepeating] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([])
+  const [favorites, setFavorites] = useState<string[]>([])
+  const { data: session } = useSession()
 
   const progressInterval = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    if (session) {
+      fetch("/api/favoris")
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setFavorites(data.favoriteAudios?.map((f: any) => f.audioId) || [])
+          }
+        })
+        .catch(console.error)
+    }
+  }, [session])
 
   useEffect(() => {
     fetch("/api/audio?limit=50")
@@ -129,6 +147,32 @@ export default function AudioPage() {
     playTrack(filteredTracks[prevIndex])
   }
 
+  const handleToggleFavorite = async (audioId: string) => {
+    if (!session) {
+      toast.error("Veuillez vous connecter pour ajouter des favoris")
+      return
+    }
+
+    const isFavorite = favorites.includes(audioId)
+
+    try {
+      const res = await fetch("/api/favoris", {
+        method: isFavorite ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "audio", itemId: audioId })
+      })
+
+      if (res.ok) {
+        setFavorites(prev =>
+          isFavorite ? prev.filter(id => id !== audioId) : [...prev, audioId]
+        )
+        toast.success(isFavorite ? "Retiré des favoris" : "Ajouté aux favoris")
+      }
+    } catch (err) {
+      toast.error("Erreur lors de la mise à jour des favoris")
+    }
+  }
+
   useEffect(() => {
     if (isPlaying && currentTrack) {
       progressInterval.current = setInterval(() => {
@@ -186,25 +230,6 @@ export default function AudioPage() {
           </motion.div>
 
           {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-wrap justify-center gap-8 mt-12"
-          >
-            <div className="text-center">
-              <p className="font-serif text-4xl font-bold text-primary">200+</p>
-              <p className="text-sm text-muted-foreground">Predications</p>
-            </div>
-            <div className="text-center">
-              <p className="font-serif text-4xl font-bold text-primary">150h+</p>
-              <p className="text-sm text-muted-foreground">De contenu</p>
-            </div>
-            <div className="text-center">
-              <p className="font-serif text-4xl font-bold text-primary">50K+</p>
-              <p className="text-sm text-muted-foreground">Ecoutes</p>
-            </div>
-          </motion.div>
         </div>
       </section>
 
@@ -320,6 +345,17 @@ export default function AudioPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleFavorite(track.id)
+                    }}
+                  >
+                    <Heart className={`h-4 w-4 ${favorites.includes(track.id) ? "fill-primary text-primary" : ""}`} />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

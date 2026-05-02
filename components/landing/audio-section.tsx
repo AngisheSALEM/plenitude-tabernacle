@@ -61,22 +61,6 @@ export function AudioSection() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20">
-                <Headphones className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-semibold text-foreground">{isLoading ? "..." : stats.count > 0 ? `${stats.count}+` : "0"}</p>
-                  <p className="text-xs text-muted-foreground">Prédications</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20">
-                <Clock className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-semibold text-foreground">{isLoading ? "..." : stats.duration}</p>
-                  <p className="text-xs text-muted-foreground">De contenu</p>
-                </div>
-              </div>
-            </div>
 
             <Link href="/audio">
               <Button 

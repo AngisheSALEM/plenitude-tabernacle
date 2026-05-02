@@ -31,6 +31,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 
 export default function AdminUsersPage() {
@@ -38,6 +48,7 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
+  const [userToDelete, setUserToDelete] = useState<any>(null)
 
   const fetchUsers = async () => {
     setIsLoading(true)
@@ -58,6 +69,27 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetchUsers()
   }, [])
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return
+    try {
+      const res = await fetch(`/api/admin/users?userId=${userToDelete.id}`, {
+        method: "DELETE",
+      })
+
+      if (res.ok) {
+        toast.success("Utilisateur supprimé")
+        fetchUsers()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || "Erreur lors de la suppression")
+      }
+    } catch (error) {
+      toast.error("Erreur réseau")
+    } finally {
+      setUserToDelete(null)
+    }
+  }
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
@@ -295,9 +327,12 @@ export default function AdminUsersPage() {
                             Rendre Membre
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => setUserToDelete(user)}
+                          >
                             <UserX className="mr-2 h-4 w-4" />
-                            Suspendre
+                            Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -309,6 +344,29 @@ export default function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Elle supprimera définitivement le compte de
+              <span className="font-bold text-foreground"> {userToDelete?.firstName} {userToDelete?.lastName} </span>
+              et toutes les données associées de nos serveurs.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer définitivement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Empty State */}
       {!isLoading && filteredUsers.length === 0 && (

@@ -4,8 +4,21 @@ import { Play, Radio, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export function HeroSection() {
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) setSettings(data)
+      })
+      .catch(console.error)
+  }, [])
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Animated background */}
@@ -70,10 +83,12 @@ export function HeroSection() {
               transition={{ delay: 0.3 }}
               className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-balance"
             >
-              <span className="text-foreground">Plénitude</span>
+              <span className="text-foreground">
+                {settings?.churchName?.split(' ')[0] || "Plénitude"}
+              </span>
               <br />
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                Tabernacle
+                {settings?.churchName?.split(' ').slice(1).join(' ') || "Tabernacle"}
               </span>
             </motion.h1>
             
@@ -83,8 +98,7 @@ export function HeroSection() {
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed"
             >
-              Une église vivante au cœur de Kinshasa. Découvrez la puissance de la Parole 
-              à travers nos enseignements et rejoignez une communauté de foi.
+              {settings?.description || "Une église vivante au cœur de Kinshasa. Découvrez la puissance de la Parole à travers nos enseignements et rejoignez une communauté de foi."}
             </motion.p>
           </div>
 
@@ -95,21 +109,25 @@ export function HeroSection() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
           >
-            <Button 
-              size="lg" 
-              className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-            >
-              <Radio className="mr-2 h-5 w-5 animate-pulse" />
-              Suivre le Direct
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="group border-border/50 hover:border-primary/50 px-8 py-6 text-lg rounded-full transition-all duration-300 hover:bg-primary/5"
-            >
-              <Play className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
-              Voir les Prédications
-            </Button>
+            <Link href="/connexion">
+              <Button
+                size="lg"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
+              >
+                <Radio className="mr-2 h-5 w-5 animate-pulse" />
+                Suivre le Direct
+              </Button>
+            </Link>
+            <Link href="/#videos">
+              <Button
+                size="lg"
+                variant="outline"
+                className="group border-border/50 hover:border-primary/50 px-8 py-6 text-lg rounded-full transition-all duration-300 hover:bg-primary/5"
+              >
+                <Play className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                Voir les Prédications
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Featured sermon card */}
