@@ -7,7 +7,8 @@ import {
   BookOpen,
   Tv,
   ArrowRight,
-  Clock
+  Clock,
+  Users
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -67,12 +68,20 @@ export default function PredicateurDashboard() {
           <h1 className="text-3xl font-serif font-bold text-foreground">Espace Prédicateur</h1>
           <p className="text-muted-foreground">Préparez vos messages et gérez vos directs.</p>
         </div>
-        <Link href="/predicateur/editeur">
-          <Button className="bg-primary hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau Message
-          </Button>
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/espace-membre">
+            <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+              <Users className="mr-2 h-4 w-4" />
+              Espace Membre
+            </Button>
+          </Link>
+          <Link href="/predicateur/editeur">
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau Message
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="relative max-w-2xl">

@@ -398,10 +398,6 @@ export default function EspaceMembrePage() {
                   <Book className="mr-2 h-4 w-4" />
                   Cantiques
                 </TabsTrigger>
-                <TabsTrigger value="downloads" className="rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <Heart className="mr-2 h-4 w-4" />
-                  Favoris
-                </TabsTrigger>
                 <TabsTrigger value="live" className="rounded-full px-6 data-[state=active]:bg-red-600 data-[state=active]:text-white relative">
                   <Tv className="mr-2 h-4 w-4" />
                   Live
@@ -676,64 +672,6 @@ export default function EspaceMembrePage() {
             <HymnBook />
           </TabsContent>
 
-          {/* Favorites Tab */}
-          <TabsContent value="downloads" className="space-y-8">
-            {favorites.videos.length === 0 && favorites.audios.length === 0 ? (
-              <div className="text-center py-20 bg-secondary/30 rounded-3xl border border-dashed border-border">
-                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <h3 className="text-lg font-medium text-foreground mb-1">Vos favoris</h3>
-                <p className="text-muted-foreground">Retrouvez ici vos prédications et chants préférés.</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {favorites.videos.length > 0 && (
-                  <section>
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <Video className="h-5 w-5 text-primary" />
-                      Vidéos favorites
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {favorites.videos.map(video => (
-                        <div key={video.id} className="bg-card border border-border rounded-xl overflow-hidden cursor-pointer" onClick={() => setSelectedVideo(video)}>
-                          <div className="aspect-video relative">
-                            <img src={getThumbnail(video)} alt={video.title} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                              <Play className="h-10 w-10 text-white" />
-                            </div>
-                          </div>
-                          <div className="p-3">
-                            <h4 className="font-medium text-sm truncate">{video.title}</h4>
-                            <p className="text-xs text-muted-foreground">{video.speaker}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-                {favorites.audios.length > 0 && (
-                  <section>
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <Headphones className="h-5 w-5 text-primary" />
-                      Audios favoris
-                    </h3>
-                    <div className="space-y-2">
-                      {favorites.audios.map(audio => (
-                        <div key={audio.id} className="flex items-center gap-4 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all cursor-pointer" onClick={() => setPlayingAudio(audio.id)}>
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            {playingAudio === audio.id ? <Pause className="h-4 w-4 text-primary" /> : <Play className="h-4 w-4 text-primary ml-0.5" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium truncate">{audio.title}</h4>
-                            <p className="text-xs text-muted-foreground">{audio.speaker}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            )}
-          </TabsContent>
 
           {/* Live Tab */}
           <TabsContent value="live" className="space-y-6">

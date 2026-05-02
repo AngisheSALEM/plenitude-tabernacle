@@ -8,11 +8,13 @@ import {
   Users, 
   Eye,
   TrendingUp,
+  Square,
   Calendar,
   Clock,
   ArrowUpRight,
   Play,
-  BookOpen
+  BookOpen,
+  Mic
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -39,6 +41,22 @@ export default function AdminDashboard() {
     }
     fetchStats()
   }, [])
+
+  const handleStopAllLives = async () => {
+    if (!confirm("Êtes-vous sûr de vouloir arrêter toutes les sessions live en cours ?")) return
+
+    try {
+      const res = await fetch("/api/live/stop-all", { method: "POST" })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(data.message || "Toutes les sessions ont été arrêtées")
+      } else {
+        toast.error(data.error || "Erreur lors de l'arrêt des sessions")
+      }
+    } catch (error) {
+      toast.error("Erreur réseau")
+    }
+  }
 
   const stats = [
     {
@@ -90,7 +108,13 @@ export default function AdminDashboard() {
             Voici un apercu de votre plateforme aujourd&apos;hui.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <Link href="/predicateur">
+            <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+              <Mic className="mr-2 h-4 w-4" />
+              Espace Prédicateur
+            </Button>
+          </Link>
           <Link href="/admin/videos/nouveau">
             <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Video className="mr-2 h-4 w-4" />
@@ -290,6 +314,15 @@ export default function AdminDashboard() {
                 <p className="mt-3 text-sm font-medium text-foreground">Gerer Horaires</p>
               </div>
             </Link>
+            <button
+              onClick={handleStopAllLives}
+              className="p-4 rounded-lg border border-border hover:border-red-500/50 hover:bg-red-500/5 transition-all cursor-pointer text-center group w-full"
+            >
+              <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Square className="h-5 w-5 text-red-500 fill-red-500" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">Arrêter Lives</p>
+            </button>
           </div>
         </CardContent>
       </Card>

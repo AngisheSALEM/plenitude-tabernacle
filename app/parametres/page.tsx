@@ -422,7 +422,7 @@ function ParametresContent() {
                         <DialogHeader>
                           <DialogTitle>Supprimer votre compte ?</DialogTitle>
                           <DialogDescription>
-                            Cette action est irreversible. Toutes vos donnees, favoris et telechargements seront definitivement supprimes.
+                            Cette action est irreversible. Toutes vos donnees et telechargements seront definitivement supprimes.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
