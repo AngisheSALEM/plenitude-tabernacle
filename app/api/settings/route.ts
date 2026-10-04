@@ -19,7 +19,7 @@ export async function GET() {
         email: "contact@plenitude-tabernacle.cd",
         website: "www.plenitude-tabernacle.cd",
         facebook: "https://facebook.com/plenitudetabernacle",
-        youtube: "https://youtube.com/@plenitudetabernacle",
+        youtube: "https://www.youtube.com/@pastorjoelmugisho3006",
         instagram: "",
         twitter: "",
         schedule: [

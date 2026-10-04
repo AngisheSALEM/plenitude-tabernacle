@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const DEFAULT_PLAYLIST_ID = "PLPNLjERB0V6CQLtDMHkck2JhHCG9JXusa";
+const DEFAULT_PLAYLIST_ID = "UUgfY5F6s25-VN4XqxYvILgA";
 const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(req: NextRequest) {

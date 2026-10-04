@@ -13,7 +13,8 @@ import {
   Facebook,
   Youtube,
   RefreshCw,
-  X
+  X,
+  ExternalLink
 } from "lucide-react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -43,7 +44,7 @@ export default function AdminSettingsPage() {
 
   const [social, setSocial] = useState({
     facebook: "https://facebook.com/plenitudetabernacle",
-    youtube: "https://youtube.com/@plenitudetabernacle",
+    youtube: "https://www.youtube.com/@pastorjoelmugisho3006",
     instagram: "",
     twitter: ""
   })
@@ -101,7 +102,7 @@ export default function AdminSettingsPage() {
   }
 
   const [youtubeSync, setYoutubeSync] = useState({
-    playlistId: "PLPNLjERB0V6CQLtDMHkck2JhHCG9JXusa",
+    playlistId: "UUgfY5F6s25-VN4XqxYvILgA",
     isSyncing: false
   })
 
@@ -374,8 +375,19 @@ export default function AdminSettingsPage() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Cette playlist sera utilisée pour importer automatiquement les nouvelles vidéos sur le site.
+                  Playlist actuelle : Chaîne Pastor Joel MUGISHO Ministries (ID: <code className="bg-muted px-1 py-0.5 rounded">UUgfY5F6s25-VN4XqxYvILgA</code>).
                 </p>
+                <div className="pt-1">
+                  <a
+                    href="https://www.youtube.com/playlist?list=UUgfY5F6s25-VN4XqxYvILgA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary underline hover:opacity-80 inline-flex items-center gap-1"
+                  >
+                    Voir la playlist sur YouTube
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
               </div>
             </CardContent>
           </Card>

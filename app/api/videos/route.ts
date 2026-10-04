@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+import channelVideos from "@/lib/channel-videos-data.json"
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -15,7 +17,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: any = {}
-    if (category && category !== "all") where.category = category
+    if (category && category !== "all" && category !== "Toutes") where.category = category
     if (featured === "true") where.isFeatured = true
     if (search) {
       where.OR = [
@@ -25,19 +27,54 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    const [videos, total] = await Promise.all([
-      prisma.video.findMany({
-        where,
-        orderBy: { date: "desc" },
-        skip,
-        take: limit,
-      }),
-      prisma.video.count({ where }),
-    ])
+    let videos: any[] = []
+    let total = 0
+
+    try {
+      const [dbVideos, dbTotal] = await Promise.all([
+        prisma.video.findMany({
+          where,
+          orderBy: { date: "desc" },
+          skip,
+          take: limit,
+        }),
+        prisma.video.count({ where }),
+      ])
+      videos = dbVideos
+      total = dbTotal
+    } catch (e) {
+      console.warn("[VIDEOS GET] DB query failed or empty, fallback to channel data", e)
+    }
+
+    // Fallback to channel data if database has no videos
+    if (total === 0) {
+      let filtered = (channelVideos as any[]).filter((v) => {
+        if (category && category !== "all" && category !== "Toutes") {
+          const catNorm = category.toLowerCase()
+          if (!v.category.toLowerCase().includes(catNorm)) return false
+        }
+        if (search) {
+          const s = search.toLowerCase()
+          const match =
+            v.title.toLowerCase().includes(s) ||
+            v.speaker.toLowerCase().includes(s) ||
+            (v.description && v.description.toLowerCase().includes(s))
+          if (!match) return false
+        }
+        return true
+      })
+      total = filtered.length
+      videos = filtered.slice(skip, skip + limit)
+    }
 
     return NextResponse.json({
       videos,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit) || 1,
+      },
     })
   } catch (error) {
     console.error("[VIDEOS GET]", error)
